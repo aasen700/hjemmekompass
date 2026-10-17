@@ -3,7 +3,8 @@ import { Activity, Apple, ArrowLeft, ArrowRight, BookOpen, Brain, Check, Chevron
 import { attitudes, priorities, strengths, visitImportance, type Answers, type AssessmentMode, type Question } from './data/assessment'
 import { modules, moduleById, suggestedDeepQuestions, type AssessmentModule } from './data/modules'
 import { makeAssessment } from './engine/recommendations'
-import { findSolutionForSuggestion } from './data/library'
+import { getTailoredMatches } from './engine/matching'
+import TailoredResults from './components/TailoredResults'
 import LibraryExplorer from './components/LibraryExplorer'
 import GuidePage from './components/GuidePage'
 
@@ -35,6 +36,7 @@ export default function App() {
   const [libraryItemId,setLibraryItemId]=useState<string|null>(null)
   const current: AssessmentModule = moduleById[selectedTopics[topicIndex] ?? 'fall']
   const assessment=useMemo(()=>makeAssessment(answers,attitude,visits,selectedTopics,deepVisited),[answers,attitude,visits,selectedTopics,deepVisited])
+  const matchedMeasures=useMemo(()=>getTailoredMatches(answers,attitude,selectedTopics,visits),[answers,attitude,selectedTopics,visits])
   const step=({intent:1,topics:2,screen:3,deep:3,results:4} as Partial<Record<Page,number>>)[page]??0
   const hasSession=Object.keys(answers).length>0||goals.length>0||userStrengths.length>0||selectedTopics.length>0||attitude!=='unknown'||visits!=='unknown'
   const navigate=(next:Page)=>{setPage(next);setMenuOpen(false);window.scrollTo({top:0,behavior:'smooth'})}
@@ -44,7 +46,7 @@ export default function App() {
   const openDeep=()=>{setDeepVisited(p=>p.includes(current.id)?p:[...p,current.id]);navigate('deep')}
   const reset=()=>{setAnswers({});setGoals([]);setUserStrengths([]);setReviewStatuses({});setAttitude('unknown');setVisits('unknown');setSelectedTopics([]);setTopicIndex(0);setMode('quick');setDeepVisited([]);setShowAllDeep([]);navigate('home')}
   const toggleTopic=(id:string)=>setSelectedTopics(p=>p.includes(id)?p.filter(x=>x!==id):modules.filter(m=>p.includes(m.id)||m.id===id).map(m=>m.id))
-  const openLibraryForSuggestion=(id:string)=>{const solution=findSolutionForSuggestion(id);if(!solution)return;setLibraryItemId(solution.id);navigate('library')}
+  const openLibraryForSolution=(id:string)=>{setLibraryItemId(id);navigate('library')}
   const toggleGoal=(value:string)=>setGoals(p=>p.includes(value)?p.filter(x=>x!==value):[...p,value])
   const toggleStrength=(value:string)=>setUserStrengths(p=>p.includes(value)?p.filter(x=>x!==value):[...p,value])
   const renderQuestions=(items:Question[]) => <div className="questions">{items.map(q=><QuestionCard key={q.id} question={q} value={answers[q.id]} onChange={v=>setAnswer(q.id,v)}/>)}</div>
@@ -110,15 +112,14 @@ export default function App() {
           <section className="panel"><h2>Brukerens perspektiv</h2><p className="muted">Viktige mål: {goals.length?goals.join(', '):'Ikke kartlagt'}</p><p className="muted">Oppgitte ressurser: {userStrengths.length?userStrengths.join(', '):'Ikke kartlagt'}</p><p className="muted">Holdning til teknologi: {attitudes.find(a=>a.value===attitude)?.label}</p><p className="muted">Betydning av hjemmebesøk: {visitImportance.find(a=>a.value===visits)?.label}</p></section>
           <section className="panel"><h2>Omfang og avklaringer</h2><div className="coverage-grid">{modules.map(m=>{const c=assessment.coverage.find(x=>x.id===m.id);return <div className={'coverage-card '+(!c?'unassessed':'')} key={m.id}><strong>{m.title}</strong><small>{c?c.screeningAnswered+' av '+c.screeningTotal+' grunnspørsmål avklart':'Ikke kartlagt'}</small></div>})}</div></section>
           <section className="panel"><h2>Identifiserte behov</h2>{assessment.needs.length?<ul className="plain-list">{assessment.needs.map(n=><li key={n}><span className="list-dot"/>{n}</li>)}</ul>:<p className="muted">Ingen konkrete utfordringer identifisert gjennom besvarte spørsmål. Dette utelukker ikke behov.</p>}</section>
-          <div className="section-title"><h2>Mulige tiltak for videre vurdering</h2></div>
-          {assessment.suggestions.length?<div className="results-list">{assessment.suggestions.map(s=><article key={s.id} className="result-card"><span className={'tag '+(s.kind==='technology'?'tech':'')}>{s.kind==='technology'?'Velferdsteknologi':'Annet tiltak'}</span><h3>{s.title}</h3><p>{s.reason}</p>{findSolutionForSuggestion(s.id)&&<button type="button" className="result-library-link" onClick={()=>openLibraryForSuggestion(s.id)}>Les om tiltaket i biblioteket <ArrowRight size={15}/></button>}{s.caution&&<div className="caution"><Info size={17}/>{s.caution}</div>}<details><summary>Hva må vurderes videre?</summary><ul>{s.considerations.map(c=><li key={c}>{c}</li>)}</ul></details><label className="review-choice"><span>Status for videre faglig drøfting</span><select value={reviewStatuses[s.id]??'none'} onChange={e=>setReviewStatuses(p=>({...p,[s.id]:e.target.value}))}><option value="none">Ikke vurdert ennå</option><option value="consider">Ønskes vurdert nærmere</option><option value="notnow">Ikke aktuelt å gå videre med nå</option></select></label></article>)}</div>:<div className="panel"><p className="muted">Ingen tiltak foreslått på foreliggende grunnlag. Vurder videre kartlegging ved behov.</p></div>}
-          <section className="panel"><h2>Ikke avklart / videre spørsmål</h2>{assessment.unknowns.length?<ul className="plain-list">{assessment.unknowns.map(n=><li key={n}><span className="list-dot"/>{n}</li>)}</ul>:<p className="muted">Ingen uavklarte grunnspørsmål i valgte områder. Det betyr ikke at en fullstendig faglig vurdering er gjennomført.</p>}</section>
+          <TailoredResults matches={matchedMeasures} reviewStatuses={reviewStatuses} setReviewStatuses={setReviewStatuses} openSolution={openLibraryForSolution} goToQuestions={()=>navigate('topics')}/>
+                    <section className="panel"><h2>Ikke avklart / videre spørsmål</h2>{assessment.unknowns.length?<ul className="plain-list">{assessment.unknowns.map(n=><li key={n}><span className="list-dot"/>{n}</li>)}</ul>:<p className="muted">Ingen uavklarte grunnspørsmål i valgte områder. Det betyr ikke at en fullstendig faglig vurdering er gjennomført.</p>}</section>
           <div className="notice"><Info size={19}/><p>Ikke klinisk validert. Bruk bare fiktive opplysninger. Besvarelsene holdes kun i minnet mens siden er åpen og lagres ikke sentralt.</p></div>
           <div className="bottom-actions"><button className="secondary" onClick={()=>navigate('topics')}><ArrowLeft size={17}/> Endre områder</button><button className="secondary" onClick={()=>{if(window.confirm('Slette alle svar og starte på nytt?'))reset()}}><RotateCcw size={17}/> Nullstill svar</button></div>
         </>}
         {page==='library'&&<LibraryExplorer key={libraryItemId??'catalog'} initialId={libraryItemId} onReturnToAssessment={selectedTopics.length?()=>navigate('results'):undefined}/>}
         {page==='guide'&&<GuidePage startAssessment={()=>navigate('intent')} openLibrary={()=>{setLibraryItemId(null);navigate('library')}}/>}
-        <footer><span>HjemmeKompass · Faglig prototype v0.4 · Kun fiktive caser</span><span>Initiativtaker og skaper: <strong>Maritha Remes Vestbø</strong></span></footer>
+        <footer><span>HjemmeKompass · Faglig prototype v0.5 · Kun fiktive caser</span><span>Skaper: <strong>Maritha Remes Vestbø</strong> <a href="tel:+4748456462">48 45 64 62</a> <a href="mailto:marithaov@icloud.com">marithaov@icloud.com</a></span></footer>
       </div>
     </main>
   </div>
