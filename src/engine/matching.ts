@@ -77,7 +77,7 @@ export const matchingRules: MatchingRule[] = [
   r('plate-guard','nutrition','Samle mat på bestikket','Brukeren trenger hjelp til å samle maten på bestikket.',[y('nutrition_one_hand')],3),
   r('handled-cup','nutrition','Drikkehjelpemiddel','Det er vanskelig å holde eller løfte en kopp.',[y('nutrition_drinking')],3,{exclude:[y('nutrition_swallow')]}),
   r('stove-guard','nutrition','Komfyr og sikkerhet','Det er registrert et konkret risikomoment ved komfyren.',[y('nutrition_stove')],7),
-  r('memory-routines','memory','Hverdagsstruktur','Hukommelsesutfordringer gir grunn til å utforske tilrettelagte rutiner.',[y('memory_difficulty')],2),
+  r('daily-plan','memory','Hverdagsstruktur','Hukommelsesutfordringer gir grunn til å utforske tilrettelagte rutiner.',[y('memory_difficulty')],2),
   r('calendar','memory','Dagsstruktur og avtaler','Brukeren ønsker støtte med avtaler, kalender eller rutiner.',[y('memory_calendar')],3,{exclude:[n('memory_messages')],check:['memory_messages','memory_senses']}),
   r('talking-clock','memory','Tid og orientering','Det er spesielt utfordrende å orientere seg om dag og tid.',[y('memory_time')],3),
   r('voice-reminders','memory','Muntlige påminnelser','Brukeren oppfatter muntlige beskjeder bedre enn skjermtekst.',[y('memory_voice')],4,{exclude:[n('memory_messages')]}),
@@ -88,7 +88,7 @@ export const matchingRules: MatchingRule[] = [
   r('video-calls','social','Digital sosial kontakt','Brukeren har uttrykt ønske om å prøve digital kontakt.',[y('social_video')],4,{exclude:[e('social_network','no')],check:['social_network']}),
   r('amplified-phone','social','Hørbar kommunikasjon','Syn eller hørsel vanskeliggjør samtaler og kontakt.',[y('social_hearing')],5),
   r('manual-wheelchair','social','Deltakelse utenfor hjemmet','Forflytning eller transport er registrert som hinder for kontakt.',[y('social_transport')],8,{specialist:true}),
-  r('activity-support','activity','Mobilitet og aktivitet','Vansker med viktige aktiviteter tilsier videre funksjonsvurdering.',[y('activity_difficulty')],2),
+  r('fall-prevention','activity','Mobilitet og aktivitet','Vansker med viktige aktiviteter tilsier videre funksjonsvurdering.',[y('activity_difficulty')],2),
   r('rollator','activity','Støtte under gange','Brukeren trenger støtte under gange.',[y('activity_walk')],3),
   r('manual-wheelchair','activity','Mobilitet over avstand','Brukeren har utfordringer med gangdistanser som er viktige i hverdagen.',[y('activity_wheel')],5),
   r('powered-wheelchair','activity','Mobilitet over avstand','Brukeren har vansker med å tilbakelegge relevante avstander.',[y('activity_wheel')],9,{specialist:true}),
@@ -125,9 +125,6 @@ export function getTailoredMatches(
     // Do not suggest technology when the person explicitly declines it.
     if(solution.kind==='technology'&&technologyAttitude==='no')continue
     // Do not silently ignore social contact and an explicit wish against replacing visits.
-    if(solution.id==='video-calls' && visitImportance==='very') {
-      // Digital contact can be explored only as a supplement, not a visit replacement.
-    }
     const missing=(rule.check??[]).filter(id=>get(id)==='unknown')
     const techUnknown=solution.kind==='technology' && technologyAttitude!=='positive'
     const reviewRequired=rule.specialist || highRisk.has(solution.id)
