@@ -22,6 +22,17 @@ export default function GuidePage({startAssessment,openLibrary}:{startAssessment
       <div className="guide-rule"><ShieldCheck size={19}/><div><strong>Faglig skjønn kan ikke automatiseres bort</strong><p>En mulig teknologi kan kreve nærmere vurdering av funksjon, responstjeneste, opplæring, oppfølging, lovgrunnlag og informasjonssikkerhet.</p></div></div>
       <div className="guide-rule"><LockKeyhole size={19}/><div><strong>Ingen reelle brukeropplysninger i prototypen</strong><p>Nettsiden har ingen pasientkonto eller serverlagring, men helseopplysninger kan likevel være identifiserende. Bruk kun fiktive caser under utvikling.</p></div></div>
     </section>
+
+    <section className="creator-section" aria-labelledby="creator-heading">
+      <div className="creator-symbol"><HeartHandshake size={27} aria-hidden="true"/></div>
+      <div className="creator-copy">
+        <p className="eyebrow">MENNESKET BAK IDÉEN</p>
+        <h2 id="creator-heading">Maritha Remes Vestbø</h2>
+        <p className="creator-role">Initiativtaker og skaper av HjemmeKompass</p>
+        <p>Maritha er helsefagarbeider med lang erfaring fra hjemmesykepleien og et stort engasjement for velferdsteknologi. Ideen bak HjemmeKompass er å gjøre det enklere for ansatte å se hele mennesket – brukerens ønsker, ressurser og behov – og utforske teknologi og hjelpemidler som kan støtte trygghet, mestring og sosial kontakt.</p>
+        <p className="creator-note">Verktøyet er under utvikling. Det er ikke et offisielt kommunalt kartleggingsinstrument eller en erstatning for faglig skjønn.</p>
+      </div>
+    </section>
     <section className="panel guide-principles">
       <h2>Før eventuell bruk i tjenesten</h2>
       <p>Innholdet er ikke klinisk validert. En ansvarlig virksomhet må blant annet vurdere faglig innhold, lokal praksis, roller og ansvar, informasjonssikkerhet, personvern, nødvendig opplæring og hvordan resultatet eventuelt skal dokumenteres i godkjente systemer.</p>
