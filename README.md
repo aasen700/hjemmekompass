@@ -1,12 +1,12 @@
 # HjemmeKompass
 
-**Faglig prototype v0.2 – kun fiktive caser, ikke til klinisk bruk.**
+**Prototype v0.3 – kun til bruk med fiktive caser. Ikke klinisk validert.**
 
-Mobiltilpasset, personsentrert kartlegging og regelbasert beslutningsstøtte for ansatte i hjemmesykepleien. Ingen kontoer eller backend.
+Personsentrert, mobiltilpasset kartlegging og regelbasert beslutningsstøtte for ansatte i hjemmesykepleien.
 
-## Lokalt oppsett
+## Kjør lokalt
 
-Krever Node.js 20+.
+Node.js 20+.
 
 ~~~bash
 npm install
@@ -15,20 +15,28 @@ npm run test
 npm run build
 ~~~
 
-## Funksjonalitet
+## Dette er utviklet
+- Åtte kartleggingsområder, valgfri hurtigkartlegging og dynamisk fordypning.
+- Brukerens mål, ressurser, holdning til teknologi og betydningen av sosiale hjemmebesøk.
+- Etterprøvbar, regelbasert kobling fra svar til mulige teknologiske og ikke-teknologiske tiltak.
+- Foreløpig resultatoversikt som viser kartleggingsomfang, ubesvarte områder og status for videre drøfting.
+- Søkbart tiltaksbibliotek med 17 detaljerte oppslag og lenker til relevant offentlig fagstoff.
+- Veiledningsside med faglige prinsipper og avgrensninger.
+- Ingen backend, innlogging, pasientprofiler eller sentral lagring; besvarelsene lever kun i appens minne mens siden er åpen.
 
-- Begynn med brukerens mål, ønsker, holdning til teknologi og betydningen av hjemmebesøk for sosial kontakt.
-- Velg ett, flere eller alle åtte kartleggingsområdene.
-- Hurtigkartlegging med grunnspørsmål og valgfri fordypning med dynamisk foreslåtte oppfølgingsspørsmål.
-- Man kan alltid vise alle fordypningsspørsmål og avslutte tidlig.
-- Oppsummering viser nøyaktig hvilke områder som er valgt, hva som er avklart og hva som ikke er kartlagt.
-- Regelbasert beslutningsstøtte viser mulige teknologiske og ikke-teknologiske tiltak, begrunnelser og faglige forbehold.
-- Ingen lagring av svar, innlogging, utskrift eller journalintegrasjon.
+## Filer
+- src/data/modules.ts: spørsmål og dynamiske fordypningsregler
+- src/engine/recommendations.ts: beslutningsstøtte
+- src/data/library.ts: tiltaksbibliotek og eksterne kilder
+- src/components/LibraryExplorer.tsx: søk, filtrering og detaljsider
+- src/components/GuidePage.tsx: introduksjon og faglige grenser
+- src/App.tsx: brukerflyt og oppsummering
+- docs/produktplan-v1.md: krav før faglig testing
 
-## Sikkerhet og faglige begrensninger
+## Viktige forbehold
 
-**Spørsmål, triggere og tiltakstekster er uvalidert faglig utkast.** Ikke bruk ekte helseopplysninger, heller ikke uten navn. Nettsiden gir ikke diagnoser, risikoskår, automatisk vurdering av beslutningskompetanse, forsvarlighet eller vedtak.
+Spørsmålene og beslutningsreglene er **faglige utkast** og må kildekontrolleres og gjennomgås av relevant fagpersonell før bruk med pasienter. Ikke legg inn ekte helseopplysninger. Det at verktøyet ikke spør etter navn, innebærer ikke i seg selv at opplysningene er anonyme.
 
-Før eventuell reell bruk kreves faglig kvalitetssikring av hver modul, kildearbeid, juridisk og personvernmessig vurdering samt mobil- og tilgjengelighetstesting. Merk at svarene ligger midlertidig i appens minne frem til siden lukkes; ikke bruk ekte pasientdata under utvikling.
+HjemmeKompass diagnostiserer ikke, gir ikke risikoskår, vurderer ikke beslutningskompetanse eller om tjenester er forsvarlige, og tildeler ikke helse- og omsorgstjenester.
 
-Spørsmålsbibliotek: src/data/modules.ts. Beslutningsregler: src/engine/recommendations.ts.
+Godkjent virksomhetsbruk krever avklaring av lovgrunnlag, personvern, informasjonssikkerhet, lokal ansvarsfordeling, prosedyreverk, opplæring og dokumentasjon. GitHub Actions kjører automatiske tester og bygg under utviklingen.
