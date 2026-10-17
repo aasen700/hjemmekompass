@@ -5,6 +5,7 @@ import { modules, moduleById, suggestedDeepQuestions, type AssessmentModule } fr
 import { makeAssessment } from './engine/recommendations'
 import { getTailoredMatches } from './engine/matching'
 import { findFollowUpConflicts } from './engine/consistency'
+import { professionalAlerts } from './engine/professionalAlerts'
 import TailoredResults from './components/TailoredResults'
 import LegalPage from './components/LegalPage'
 import LibraryExplorer from './components/LibraryExplorer'
@@ -40,6 +41,7 @@ export default function App() {
   const assessment=useMemo(()=>makeAssessment(answers,attitude,visits,selectedTopics,deepVisited),[answers,attitude,visits,selectedTopics,deepVisited])
   const matchedMeasures=useMemo(()=>getTailoredMatches(answers,attitude,selectedTopics,visits),[answers,attitude,selectedTopics,visits])
   const answerConflicts=useMemo(()=>findFollowUpConflicts(answers,selectedTopics),[answers,selectedTopics])
+  const followUpAlerts=useMemo(()=>professionalAlerts(answers,selectedTopics,visits),[answers,selectedTopics,visits])
   const step=({intent:1,topics:2,screen:3,deep:3,results:4} as Partial<Record<Page,number>>)[page]??0
   const hasSession=Object.keys(answers).length>0||goals.length>0||userStrengths.length>0||selectedTopics.length>0||attitude!=='unknown'||visits!=='unknown'
   const navigate=(next:Page)=>{setPage(next);setMenuOpen(false);window.scrollTo({top:0,behavior:'smooth'})}
@@ -115,6 +117,7 @@ export default function App() {
           <section className="panel"><h2>Brukerens perspektiv</h2><p className="muted">Viktige mål: {goals.length?goals.join(', '):'Ikke kartlagt'}</p><p className="muted">Oppgitte ressurser: {userStrengths.length?userStrengths.join(', '):'Ikke kartlagt'}</p><p className="muted">Holdning til teknologi: {attitudes.find(a=>a.value===attitude)?.label}</p><p className="muted">Betydning av hjemmebesøk: {visitImportance.find(a=>a.value===visits)?.label}</p></section>
           <section className="panel"><h2>Omfang og avklaringer</h2><div className="coverage-grid">{modules.map(m=>{const c=assessment.coverage.find(x=>x.id===m.id);return <div className={'coverage-card '+(!c?'unassessed':'')} key={m.id}><strong>{m.title}</strong><small>{c?c.screeningAnswered+' av '+c.screeningTotal+' grunnspørsmål avklart':'Ikke kartlagt'}</small></div>})}</div></section>
           <section className="panel"><h2>Identifiserte behov</h2>{assessment.needs.length?<ul className="plain-list">{assessment.needs.map(n=><li key={n}><span className="list-dot"/>{n}</li>)}</ul>:<p className="muted">Ingen konkrete utfordringer identifisert gjennom besvarte spørsmål. Dette utelukker ikke behov.</p>}</section>
+          {followUpAlerts.length>0&&<section className="panel professional-flags"><p className="eyebrow">FAGLIGE OPPFØLGINGSPUNKTER</p><h2>Forhold som krever videre vurdering</h2><p className="muted small">Dette er ikke triage eller kliniske konklusjoner. Punktene er varsler om behov for ordinær faglig oppfølging.</p>{followUpAlerts.map(alert=><div className="professional-flag" key={alert.id}><Info size={18}/><div><strong>{alert.title}</strong><p>{alert.message}</p><a href={alert.sourceUrl} target="_blank" rel="noopener noreferrer">Relevant offentlig fagkilde</a></div></div>)}</section>}
           <TailoredResults matches={matchedMeasures} reviewStatuses={reviewStatuses} setReviewStatuses={setReviewStatuses} openSolution={openLibraryForSolution} goToQuestions={()=>navigate('topics')}/>
                     {answerConflicts.length>0&&<section className="panel answer-conflict"><h2><Info size={19}/> Svar som bør kontrolleres</h2><p className="muted small">Noen fordypningssvar passer ikke lenger med grunnsvarene. De er ikke brukt som grunnlag for tiltak før de er avklart.</p><ul className="plain-list">{answerConflicts.map(item=><li key={item}><span className="list-dot"/>{item}</li>)}</ul></section>}
           <section className="panel"><h2>Ikke avklart / videre spørsmål</h2>{assessment.unknowns.length?<ul className="plain-list">{assessment.unknowns.map(n=><li key={n}><span className="list-dot"/>{n}</li>)}</ul>:<p className="muted">Ingen uavklarte grunnspørsmål i valgte områder. Det betyr ikke at en fullstendig faglig vurdering er gjennomført.</p>}</section>
