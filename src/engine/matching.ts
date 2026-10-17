@@ -30,7 +30,6 @@ export type TailoredMatch = {
 }
 const y=(id:string):Evidence=>({id,values:['yes']})
 const n=(id:string):Evidence=>({id,values:['no','partly']})
-const c=(id:string):Evidence=>({id,values:['yes','partly']})
 const e=(id:string,...values:string[]):Evidence=>({id,values})
 const r=(solutionId:string,topic:string,need:string,explanation:string,when:Evidence[],priority:number,
   extra:Partial<Pick<MatchingRule,'exclude'|'check'|'specialist'>>={}):MatchingRule=>({solutionId,topic,need,explanation,when,priority,...extra})
