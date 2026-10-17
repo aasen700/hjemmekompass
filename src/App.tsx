@@ -4,6 +4,7 @@ import { attitudes, priorities, strengths, visitImportance, type Answers, type A
 import { modules, moduleById, suggestedDeepQuestions, type AssessmentModule } from './data/modules'
 import { makeAssessment } from './engine/recommendations'
 import { getTailoredMatches } from './engine/matching'
+import { findFollowUpConflicts } from './engine/consistency'
 import TailoredResults from './components/TailoredResults'
 import LegalPage from './components/LegalPage'
 import LibraryExplorer from './components/LibraryExplorer'
@@ -38,6 +39,7 @@ export default function App() {
   const current: AssessmentModule = moduleById[selectedTopics[topicIndex] ?? 'fall']
   const assessment=useMemo(()=>makeAssessment(answers,attitude,visits,selectedTopics,deepVisited),[answers,attitude,visits,selectedTopics,deepVisited])
   const matchedMeasures=useMemo(()=>getTailoredMatches(answers,attitude,selectedTopics,visits),[answers,attitude,selectedTopics,visits])
+  const answerConflicts=useMemo(()=>findFollowUpConflicts(answers,selectedTopics),[answers,selectedTopics])
   const step=({intent:1,topics:2,screen:3,deep:3,results:4} as Partial<Record<Page,number>>)[page]??0
   const hasSession=Object.keys(answers).length>0||goals.length>0||userStrengths.length>0||selectedTopics.length>0||attitude!=='unknown'||visits!=='unknown'
   const navigate=(next:Page)=>{setPage(next);setMenuOpen(false);window.scrollTo({top:0,behavior:'smooth'})}
@@ -114,7 +116,8 @@ export default function App() {
           <section className="panel"><h2>Omfang og avklaringer</h2><div className="coverage-grid">{modules.map(m=>{const c=assessment.coverage.find(x=>x.id===m.id);return <div className={'coverage-card '+(!c?'unassessed':'')} key={m.id}><strong>{m.title}</strong><small>{c?c.screeningAnswered+' av '+c.screeningTotal+' grunnspørsmål avklart':'Ikke kartlagt'}</small></div>})}</div></section>
           <section className="panel"><h2>Identifiserte behov</h2>{assessment.needs.length?<ul className="plain-list">{assessment.needs.map(n=><li key={n}><span className="list-dot"/>{n}</li>)}</ul>:<p className="muted">Ingen konkrete utfordringer identifisert gjennom besvarte spørsmål. Dette utelukker ikke behov.</p>}</section>
           <TailoredResults matches={matchedMeasures} reviewStatuses={reviewStatuses} setReviewStatuses={setReviewStatuses} openSolution={openLibraryForSolution} goToQuestions={()=>navigate('topics')}/>
-                    <section className="panel"><h2>Ikke avklart / videre spørsmål</h2>{assessment.unknowns.length?<ul className="plain-list">{assessment.unknowns.map(n=><li key={n}><span className="list-dot"/>{n}</li>)}</ul>:<p className="muted">Ingen uavklarte grunnspørsmål i valgte områder. Det betyr ikke at en fullstendig faglig vurdering er gjennomført.</p>}</section>
+                    {answerConflicts.length>0&&<section className="panel answer-conflict"><h2><Info size={19}/> Svar som bør kontrolleres</h2><p className="muted small">Noen fordypningssvar passer ikke lenger med grunnsvarene. De er ikke brukt som grunnlag for tiltak før de er avklart.</p><ul className="plain-list">{answerConflicts.map(item=><li key={item}><span className="list-dot"/>{item}</li>)}</ul></section>}
+          <section className="panel"><h2>Ikke avklart / videre spørsmål</h2>{assessment.unknowns.length?<ul className="plain-list">{assessment.unknowns.map(n=><li key={n}><span className="list-dot"/>{n}</li>)}</ul>:<p className="muted">Ingen uavklarte grunnspørsmål i valgte områder. Det betyr ikke at en fullstendig faglig vurdering er gjennomført.</p>}</section>
           <div className="notice"><Info size={19}/><p>Ikke klinisk validert. Bruk bare fiktive opplysninger. Besvarelsene holdes kun i minnet mens siden er åpen og lagres ikke sentralt.</p></div>
           <div className="bottom-actions"><button className="secondary" onClick={()=>navigate('topics')}><ArrowLeft size={17}/> Endre områder</button><button className="secondary" onClick={()=>{if(window.confirm('Slette alle svar og starte på nytt?'))reset()}}><RotateCcw size={17}/> Nullstill svar</button></div>
         </>}
