@@ -41,6 +41,7 @@ export default function LibraryExplorer({initialId,onReturnToAssessment}:Props) 
   const [query,setQuery]=useState('')
   const [category,setCategory]=useState('Alle områder')
   const [type,setType]=useState<'all'|'technology'|'aid'|'nontech'>('all')
+  const quickFind=[{label:'Dostol',query:'dostol'},{label:'Søsterhjelp',query:'søsterhjelp'},{label:'Støttestrømper',query:'støttestrømper'},{label:'GPS',query:'gps'},{label:'Forflytning',area:'Forflytning'},{label:'Bad og toalett',area:'Bad og toalett'}]
   const [visible,setVisible]=useState(12)
   const categories=['Alle områder',...new Set(solutions.map(s=>s.group))]
   const items=useMemo(()=>solutions.filter(s=>{
@@ -48,7 +49,7 @@ export default function LibraryExplorer({initialId,onReturnToAssessment}:Props) 
     if(type!=='all'&&s.kind!==type)return false
     const text=[s.title,s.intro,s.need,s.group,...s.before,...s.alternatives,...(s.searchTerms??[])].join(' ').toLocaleLowerCase('nb-NO')
     return text.includes(query.toLocaleLowerCase('nb-NO').trim())
-  }),[category,query,type])
+  }).sort((a,b)=>a.title.localeCompare(b.title,'nb-NO')),[category,query,type])
 
   const active=solutions.find(s=>s.id===selected)
   const setSearch=(value:string)=>{setQuery(value);setVisible(12)}
@@ -60,6 +61,7 @@ export default function LibraryExplorer({initialId,onReturnToAssessment}:Props) 
       <h1>Finn frem til mulighetene.</h1>
       <p className="lead">Utforsk teknologiske og ikke-teknologiske tiltak. Søk i et utvidet bibliotek med velferdsteknologi, praktiske hjelpemidler og ikke-teknologiske tiltak. Utforsk mulige behov, forutsetninger og begrensninger.</p>
       {onReturnToAssessment&&<button className="text-link knowledge-back" type="button" onClick={onReturnToAssessment}><ArrowLeft size={17}/> Tilbake til oppsummeringen</button>}
+      <div className="library-quickfind"><span>Hurtigsøk</span>{quickFind.map(q=><button key={q.label} type="button" onClick={()=>{setSearch(q.query??'');setArea(q.area??'Alle områder');setType('all')}}>{q.label}</button>)}</div>
       <div className="library-toolbar">
         <label className="library-search"><Search size={19}/><span className="sr-only">Søk i tiltaksbiblioteket</span><input value={query} type="search" onChange={e=>setSearch(e.target.value)} placeholder="Søk etter tiltak, behov eller teknologi..."/></label>
         <label className="library-filter"><SlidersHorizontal size={17}/><span className="sr-only">Filtrer etter område</span><select value={category} onChange={e=>setArea(e.target.value)}>{categories.map(c=><option key={c} value={c}>{c}</option>)}</select></label>
