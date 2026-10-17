@@ -1,96 +1,125 @@
 import { useMemo, useState } from 'react'
-import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, ClipboardList, Compass, Heart, Home, Info, Lightbulb, Menu, RotateCcw, ShieldCheck, X } from 'lucide-react'
-import { attitudes, deepQuestions, priorities, screeningQuestions, topicCards, visitImportance, type Answers, type AssessmentMode, type Question } from './data/assessment'
+import { Activity, Apple, ArrowLeft, ArrowRight, BookOpen, Brain, Check, ChevronRight, ClipboardList, Compass, Heart, Home, Info, Lightbulb, Menu, Monitor, Pill, RotateCcw, ShieldCheck, Shirt, Users, X } from 'lucide-react'
+import { attitudes, priorities, visitImportance, type Answers, type AssessmentMode, type Question } from './data/assessment'
+import { modules, moduleById, suggestedDeepQuestions, type AssessmentModule } from './data/modules'
 import { makeAssessment } from './engine/recommendations'
 
-type Page = 'home' | 'intent' | 'screen' | 'deep' | 'results' | 'library'
-const title: Record<Page, string> = { home: 'Hjem', intent: 'Brukerens ønsker', screen: 'Trygghet og fall', deep: 'Fordypning', results: 'Oppsummering', library: 'Tiltaksbibliotek' }
+type Page = 'home' | 'intent' | 'topics' | 'screen' | 'deep' | 'results' | 'library'
+const pageTitle: Record<Page, string> = { home: 'Hjem', intent: 'Brukerens ønsker', topics: 'Velg områder', screen: 'Kartlegging', deep: 'Fordypning', results: 'Oppsummering', library: 'Tiltaksbibliotek' }
+const icons = [ShieldCheck, Pill, Shirt, Apple, Brain, Users, Activity, Monitor]
+const libraryEntries = [
+  ['Digital trygghetsalarm','Mulighet til å varsle ved behov; krever vurdering av brukerens betjeningsevne og responstjeneste.'],
+  ['Fallsensor','Kan registrere enkelte fall og utløse varsel, men forebygger ikke fall og kan unnlate å varsle.'],
+  ['Automatisk nattlys','Kan bedre oversikten i mørke omgivelser, men løser ikke andre årsaker til fall.'],
+  ['Elektronisk medisindispenser','Kan gi påminnelser og utlevering etter etablerte rutiner; krever forsvarlig legemiddelhåndtering og oppfølging.'],
+  ['Digital kalender og dagsplan','Kan støtte struktur og påminnelser dersom informasjonen kan forstås og brukes.'],
+  ['Enkel løsning for videosamtaler','Kan støtte ønsket sosial kontakt når mottaker, utstyr og digital mestring er avklart.'],
+  ['Digitalt tilsyn','Kan vurderes ved konkret tilsynsbehov; krever særskilt faglig, rettslig og personvernmessig vurdering.'],
+  ['Boligtilpasning og praktisk bistand','Ikke-teknologiske alternativer kan bidra til trygghet, mestring og gode hverdagsrutiner.']
+] as const
 
 function QuestionCard({ question, value, onChange }: { question: Question; value?: string; onChange: (value: string) => void }) {
   return <fieldset className="question">
     <legend>{question.title}</legend>
     {question.help && <p className="muted small">{question.help}</p>}
-    <div className="options">{question.options.map(o => <button key={o.value} type="button" className={'option ' + (value === o.value ? 'selected' : '')} aria-pressed={value === o.value} onClick={() => onChange(o.value)}>{o.label}{value === o.value && <Check size={16}/>}</button>)}</div>
+    <div className="options">{question.options.map(o=><button key={o.value} type="button" className={'option '+(value===o.value?'selected':'')} aria-pressed={value===o.value} onClick={()=>onChange(o.value)}>{o.label}{value===o.value&&<Check size={16}/>}</button>)}</div>
   </fieldset>
 }
-const services = [
-  { title: 'Digital trygghetsalarm', detail: 'Kan gi mulighet til å tilkalle hjelp. Må vurderes ut fra brukerens mestring, dekning og responstjeneste.' },
-  { title: 'Fallsensor', detail: 'Kan være aktuell ved særskilte behov. Kan gi falske alarmer eller unnlate å registrere fall.' },
-  { title: 'Automatisk nattlys', detail: 'Kan støtte tryggere ferdsel. Må vurderes opp mot bolig, forflytning og brukerens ønsker.' },
-  { title: 'Digitalt tilsyn', detail: 'Krever særskilt faglig, juridisk og personvernmessig vurdering; erstatter ikke automatisk fysiske besøk.' },
-  { title: 'Fallforebygging og boligtilpasning', detail: 'Ikke-teknologiske tiltak, vurdering av hjelpemidler og eventuell ergo-/fysioterapi.' }
-]
 
 export default function App() {
-  const [page, setPage] = useState<Page>('home')
-  const [mode, setMode] = useState<AssessmentMode>('quick')
-  const [answers, setAnswers] = useState<Answers>({})
-  const [goals, setGoals] = useState<string[]>([])
-  const [attitude, setAttitude] = useState('unknown')
-  const [visits, setVisits] = useState('unknown')
-  const [menuOpen, setMenuOpen] = useState(false)
-  const assessment = useMemo(() => makeAssessment(answers, attitude, visits), [answers, attitude, visits])
-  const answered = screeningQuestions.filter(q => answers[q.id] && answers[q.id] !== 'unknown').length
-  const step = ({ intent: 1, screen: 2, deep: 2, results: 3 } as Partial<Record<Page, number>>)[page] ?? 0
-  const navigate = (next: Page) => { setPage(next); setMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }) }
-  const reset = () => { setAnswers({}); setGoals([]); setAttitude('unknown'); setVisits('unknown'); setMode('quick'); navigate('home') }
-  const setAnswer = (id: string, val: string) => setAnswers(p => ({ ...p, [id]: val }))
-  const toggleGoal = (value: string) => setGoals(p => p.includes(value) ? p.filter(x => x !== value) : [...p, value])
-  const renderQuestions = (qs: Question[]) => <div className="questions">{qs.map(q => <QuestionCard key={q.id} question={q} value={answers[q.id]} onChange={v => setAnswer(q.id, v)}/>)}</div>
+  const [page,setPage]=useState<Page>('home')
+  const [answers,setAnswers]=useState<Answers>({})
+  const [goals,setGoals]=useState<string[]>([])
+  const [attitude,setAttitude]=useState('unknown')
+  const [visits,setVisits]=useState('unknown')
+  const [selectedTopics,setSelectedTopics]=useState<string[]>([])
+  const [topicIndex,setTopicIndex]=useState(0)
+  const [mode,setMode]=useState<AssessmentMode>('quick')
+  const [deepVisited,setDeepVisited]=useState<string[]>([])
+  const [showAllDeep,setShowAllDeep]=useState<string[]>([])
+  const [menuOpen,setMenuOpen]=useState(false)
+  const current: AssessmentModule = moduleById[selectedTopics[topicIndex] ?? 'fall']
+  const assessment=useMemo(()=>makeAssessment(answers,attitude,visits,selectedTopics,deepVisited),[answers,attitude,visits,selectedTopics,deepVisited])
+  const step=({intent:1,topics:2,screen:3,deep:3,results:4} as Partial<Record<Page,number>>)[page]??0
+  const hasSession=Object.keys(answers).length>0||goals.length>0||selectedTopics.length>0||attitude!=='unknown'||visits!=='unknown'
+  const navigate=(next:Page)=>{setPage(next);setMenuOpen(false);window.scrollTo({top:0,behavior:'smooth'})}
+  const setAnswer=(id:string,value:string)=>setAnswers(prev=>({...prev,[id]:value}))
+  const startModule=(id:string)=>{const idx=selectedTopics.indexOf(id);if(idx<0)return;setTopicIndex(idx);navigate('screen')}
+  const nextModule=()=>{if(topicIndex+1<selectedTopics.length){setTopicIndex(topicIndex+1);navigate('screen')}else navigate('results')}
+  const openDeep=()=>{setDeepVisited(p=>p.includes(current.id)?p:[...p,current.id]);navigate('deep')}
+  const reset=()=>{setAnswers({});setGoals([]);setAttitude('unknown');setVisits('unknown');setSelectedTopics([]);setTopicIndex(0);setMode('quick');setDeepVisited([]);setShowAllDeep([]);navigate('home')}
+  const toggleTopic=(id:string)=>setSelectedTopics(p=>p.includes(id)?p.filter(x=>x!==id):modules.filter(m=>p.includes(m.id)||m.id===id).map(m=>m.id))
+  const toggleGoal=(value:string)=>setGoals(p=>p.includes(value)?p.filter(x=>x!==value):[...p,value])
+  const renderQuestions=(items:Question[]) => <div className="questions">{items.map(q=><QuestionCard key={q.id} question={q} value={answers[q.id]} onChange={v=>setAnswer(q.id,v)}/>)}</div>
+  const screenAnswered=current.screening.filter(q=>answers[q.id]&&answers[q.id]!=='unknown').length
+  const filteredDeep=suggestedDeepQuestions(current,answers,showAllDeep.includes(current.id))
+  const showMenu=(target:Page)=>{if(target==='screen'){if(selectedTopics.length)startModule(selectedTopics[0]);else navigate('topics')}else navigate(target)}
 
   return <div className="app">
-    <aside className={'sidebar ' + (menuOpen ? 'is-open' : '')}>
-      <button className="brand" onClick={() => navigate('home')}><span className="brand-mark"><Compass size={23}/></span><span>Hjemme<span className="brand-light">Kompass</span><small>Kartlegging med mennesket i sentrum</small></span></button>
-      <nav aria-label="Hovedmeny">
-        {([['home','Hjem',Home],['intent','Ny kartlegging',ClipboardList],['library','Tiltaksbibliotek',BookOpen],['results','Oppsummering',Lightbulb]] as const).map(([p,t,I]) => <button key={p} className={'nav-link '+(page===p?'active':'')} onClick={()=>navigate(p)}><I size={19}/>{t}</button>)}
-      </nav>
-      <div className="sidebar-foot"><Heart size={17}/> <span>Teknologi skal støtte mennesker, ikke erstatte faglig skjønn.</span></div>
+    <aside className={'sidebar '+(menuOpen?'is-open':'')}>
+      <button className="brand" onClick={()=>navigate('home')}><span className="brand-mark"><Compass size={23}/></span><span>Hjemme<span className="brand-light">Kompass</span><small>Kartlegging med mennesket i sentrum</small></span></button>
+      <nav aria-label="Hovedmeny">{([['home','Hjem',Home],['intent','Ny kartlegging',ClipboardList],['topics','Kartleggingsområder',ShieldCheck],['library','Tiltaksbibliotek',BookOpen],['results','Oppsummering',Lightbulb]] as const).map(([p,text,Icon])=><button key={p} className={'nav-link '+(page===p?'active':'')} onClick={()=>showMenu(p)}><Icon size={19}/>{text}</button>)}</nav>
+      <div className="sidebar-foot"><Heart size={17}/><span>Teknologi skal støtte mennesker, ikke erstatte faglig skjønn.</span></div>
     </aside>
-    {menuOpen && <button className="scrim" onClick={()=>setMenuOpen(false)} aria-label="Lukk meny"/>}
+    {menuOpen&&<button className="scrim" onClick={()=>setMenuOpen(false)} aria-label="Lukk meny"/>}
     <main className="main">
-      <header className="topbar"><button className="mobile-menu icon-btn" aria-label="Åpne meny" onClick={()=>setMenuOpen(v=>!v)}>{menuOpen?<X/>:<Menu/>}</button><div className="breadcrumb">HjemmeKompass <ChevronRight size={14}/> <strong>{title[page]}</strong></div><span className="top-pill"><ShieldCheck size={15}/> Faglig prototype</span></header>
+      <header className="topbar"><button className="mobile-menu icon-btn" aria-label="Åpne meny" onClick={()=>setMenuOpen(v=>!v)}>{menuOpen?<X/>:<Menu/>}</button><div className="breadcrumb">HjemmeKompass <ChevronRight size={14}/> <strong>{pageTitle[page]}</strong></div><span className="top-pill"><ShieldCheck size={15}/> Faglig prototype</span></header>
       <div className="content">
-        {page==='home' && <>
-          <div className="intro-row"><div><p className="eyebrow">VELKOMMEN TIL HJEMMEKOMPASS</p><h1>En tryggere vei til gode valg.</h1><p className="lead">Et enkelt, personsentrert støtteverktøy for kartlegging av mestring, trygghet og velferdsteknologi i hjemmesykepleien.</p><button className="primary" onClick={()=>navigate('intent')}>Start kartlegging <ArrowRight size={17}/></button></div><div className="hero-art" aria-hidden="true"><div className="sun"/><div className="hill h1"/><div className="hill h2"/><div className="house"><div className="roof"/><div className="door"/></div><div className="path"/></div></div>
+        {page==='home'&&<>
+          <div className="intro-row"><div><p className="eyebrow">VELKOMMEN TIL HJEMMEKOMPASS</p><h1>En tryggere vei til gode valg.</h1><p className="lead">Personsentrert kartlegging av trygghet, mestring, sosial kontakt og velferdsteknologi – til støtte for ansatte i hjemmesykepleien.</p><button className="primary" onClick={()=>navigate('intent')}>{hasSession?'Fortsett kartlegging':'Start kartlegging'} <ArrowRight size={17}/></button></div><div className="hero-art" aria-hidden="true"><div className="sun"/><div className="hill h1"/><div className="hill h2"/><div className="house"><div className="roof"/><div className="door"/></div><div className="path"/></div></div>
           <div className="section-title"><div><p className="eyebrow">SLIK FUNGERER DET</p><h2>Fra behov til muligheter</h2></div></div>
-          <div className="how-grid">{[['01','Hva er viktig?','Start med brukerens mål, ressurser og ønsker.'],['02','Kartlegg i eget tempo','Ta en rask gjennomgang eller fordyp deg.'],['03','Få faglig støtte','Se mulige tiltak, forbehold og videre avklaringer.']].map(([n,t,d])=><div className="how-card" key={n}><span className="how-num">{n}</span><h3>{t}</h3><p>{d}</p></div>)}</div>
-          <div className="section-title"><div><p className="eyebrow">KARTLEGGINGSOMRÅDER</p><h2>Utforsk temaene</h2></div><span className="small muted">Første modul er klar til utprøving</span></div>
-          <div className="topic-grid">{topicCards.map((t,i)=><button key={t.id} className={'topic-card '+(t.active?'topic-active':'topic-disabled')} onClick={()=>t.active && navigate('intent')} disabled={!t.active}><span className="topic-icon">{i===0?<ShieldCheck size={22}/>:i===3?<Heart size={22}/>:<ClipboardList size={22}/>}</span><strong>{t.title}</strong><small>{t.description}</small><span className="topic-bottom">{t.active?'Åpne kartlegging':'Kommer senere'} <ArrowRight size={15}/></span></button>)}</div>
-          <div className="notice"><Info size={19}/><p><strong>Viktig om prototypen:</strong> Ikke legg inn reelle helseopplysninger. Innholdet er ikke klinisk validert. Verktøyet gir ikke automatiske vedtak eller vurderinger av forsvarlighet.</p></div>
+          <div className="how-grid">{[['01','Brukerens perspektiv','Start med mål, ressurser og ønsker.'],['02','Kartlegg i eget tempo','Velg relevante temaer og valgfri fordypning.'],['03','Utforsk mulige tiltak','Se muligheter, forbehold og videre avklaringer.']].map(([n,t,d])=><div className="how-card" key={n}><span className="how-num">{n}</span><h3>{t}</h3><p>{d}</p></div>)}</div>
+          <div className="section-title"><div><p className="eyebrow">KARTLEGGINGSOMRÅDER</p><h2>Åtte områder – velg selv</h2></div></div>
+          <div className="topic-grid">{modules.map((m,i)=>{const Icon=icons[i];return <button key={m.id} className="topic-card topic-active" onClick={()=>{setSelectedTopics([m.id]);setTopicIndex(0);navigate('intent')}}><span className="topic-icon"><Icon size={22}/></span><strong>{m.title}</strong><small>{m.description}</small><span className="topic-bottom">Start med dette området <ArrowRight size={15}/></span></button>})}</div>
+          <div className="notice"><Info size={19}/><p><strong>Viktig:</strong> Denne prototypen er ikke klinisk validert. Bruk bare fiktive caser. Verktøyet gir ikke tjenestevedtak eller automatiske vurderinger av forsvarlighet.</p></div>
         </>}
-        {(['intent','screen','deep','results'] as Page[]).includes(page) && <div className="progress" aria-label="Fremdrift">{['Brukerens ønsker','Kartlegging','Oppsummering'].map((s,i)=><div key={s} className={'progress-step '+(step>=i+1?'current':'')}><span>{i+1}</span><small>{s}</small></div>)}</div>}
-        {page==='intent' && <>
-          <p className="eyebrow">STEG 1 AV 3</p><h1>Hva er viktig for brukeren?</h1><p className="lead">Start med brukerens perspektiv. Velg det som er relevant, uten navn eller andre identifiserende opplysninger.</p>
-          <section className="panel"><h2>Brukerens mål og ønsker</h2><p className="muted">Hva er viktig i hverdagen? Flere valg er mulig.</p><div className="goal-grid">{priorities.map(g=><button key={g} aria-pressed={goals.includes(g)} className={'goal '+(goals.includes(g)?'selected':'')} onClick={()=>toggleGoal(g)}>{g}{goals.includes(g)&&<Check size={16}/>}</button>)}</div></section>
+        {(['intent','topics','screen','deep','results'] as Page[]).includes(page)&&<div className="progress" aria-label="Fremdrift">{['Brukerens ønsker','Velg områder','Kartlegging','Oppsummering'].map((s,i)=><div key={s} className={'progress-step '+(step>=i+1?'current':'')}><span>{i+1}</span><small>{s}</small></div>)}</div>}
+        {page==='intent'&&<>
+          <p className="eyebrow">STEG 1 AV 4</p><h1>Hva er viktig for brukeren?</h1><p className="lead">Brukerens egne mål er utgangspunktet. Ikke legg inn navn eller andre identifiserende opplysninger.</p>
+          <section className="panel"><h2>Brukerens mål og ønsker</h2><p className="muted">Hva er viktig i hverdagen? Velg gjerne flere.</p><div className="goal-grid">{priorities.map(g=><button key={g} aria-pressed={goals.includes(g)} className={'goal '+(goals.includes(g)?'selected':'')} onClick={()=>toggleGoal(g)}>{g}{goals.includes(g)&&<Check size={16}/>}</button>)}</div></section>
           <section className="panel"><h2>Hvordan stiller brukeren seg til teknologi?</h2><div className="choice-list">{attitudes.map(a=><button key={a.value} aria-pressed={attitude===a.value} onClick={()=>setAttitude(a.value)} className={'wide-choice '+(attitude===a.value?'selected':'')}><span><strong>{a.label}</strong><small>{a.detail}</small></span>{attitude===a.value&&<Check size={18}/>}</button>)}</div></section>
-          <section className="panel"><h2>Hva betyr hjemmebesøk for den sosiale kontakten?</h2><p className="muted small">Dette vurderes ut fra brukerens egen opplevelse, ikke bare antall kontakter i nettverket.</p><div className="choice-list">{visitImportance.map(a=><button key={a.value} aria-pressed={visits===a.value} onClick={()=>setVisits(a.value)} className={'wide-choice '+(visits===a.value?'selected':'')}><span><strong>{a.label}</strong><small>{a.detail}</small></span>{visits===a.value&&<Check size={18}/>}</button>)}</div></section>
-          <div className="bottom-actions"><button className="secondary" onClick={()=>navigate('home')}><ArrowLeft size={17}/> Tilbake</button><button className="primary" onClick={()=>navigate('screen')}>Videre til kartlegging <ArrowRight size={17}/></button></div>
+          <section className="panel"><h2>Hva betyr hjemmebesøk for sosial kontakt?</h2><p className="muted small">Vurder brukerens egen opplevelse, ikke bare hvor stort nettverk vedkommende har.</p><div className="choice-list">{visitImportance.map(a=><button key={a.value} aria-pressed={visits===a.value} onClick={()=>setVisits(a.value)} className={'wide-choice '+(visits===a.value?'selected':'')}><span><strong>{a.label}</strong><small>{a.detail}</small></span>{visits===a.value&&<Check size={18}/>}</button>)}</div></section>
+          <div className="bottom-actions"><button className="secondary" onClick={()=>navigate('home')}><ArrowLeft size={17}/> Tilbake</button><button className="primary" onClick={()=>navigate('topics')}>Velg kartleggingsområder <ArrowRight size={17}/></button></div>
         </>}
-        {page==='screen' && <>
-          <p className="eyebrow">STEG 2 AV 3 · FØRSTE MODUL</p><h1>Trygghet og fall</h1><p className="lead">Utforsk opplevd trygghet, fall og muligheten til å tilkalle hjelp. Du kan fordype deg når det er relevant.</p>
-          <div className="mode-switch" aria-label="Kartleggingsmodus"><button className={mode==='quick'?'selected':''} onClick={()=>setMode('quick')}>Hurtigkartlegging</button><button className={mode==='deep'?'selected':''} onClick={()=>setMode('deep')}>Grundig kartlegging</button></div>
-          <div className="panel"><div className="panel-head"><div><p className="eyebrow">INNLEDENDE SPØRSMÅL</p><h2>Brukerens trygghet hjemme</h2></div><span className="count">{answered} av 4 avklart</span></div>{renderQuestions(screeningQuestions)}</div>
-          <div className="subtle-panel"><div><h3>Vil du undersøke dette nærmere?</h3><p>Fordypning er valgfri og kan åpnes uten å starte kartleggingen på nytt.</p></div><button className="secondary" onClick={()=>navigate('deep')}>Åpne fordypning <ArrowRight size={17}/></button></div>
-          <div className="bottom-actions"><button className="secondary" onClick={()=>navigate('intent')}><ArrowLeft size={17}/> Tilbake</button><button className="primary" onClick={()=>navigate(mode==='deep'?'deep':'results')}>{mode==='deep'?'Fortsett til fordypning':'Se oppsummering'} <ArrowRight size={17}/></button></div>
+        {page==='topics'&&<>
+          <p className="eyebrow">STEG 2 AV 4</p><h1>Hva vil du kartlegge?</h1><p className="lead">Velg ett, flere eller alle åtte områder. Det er like greit å utforske ett relevant behov som å gjennomføre en bred kartlegging.</p>
+          <div className="selection-head"><strong>{selectedTopics.length} av 8 områder valgt</strong><div className="selection-actions"><button className="text-link" onClick={()=>setSelectedTopics(modules.map(m=>m.id))}>Velg alle</button><button className="text-link" onClick={()=>setSelectedTopics([])}>Fjern alle</button></div></div>
+          <div className="topic-grid">{modules.map((m,i)=>{const Icon=icons[i],selected=selectedTopics.includes(m.id);return <button key={m.id} aria-pressed={selected} className={'topic-card topic-active select-topic '+(selected?'chosen':'')} onClick={()=>toggleTopic(m.id)}><span className="topic-icon"><Icon size={22}/></span><span className="select-check">{selected?<Check size={17}/>:null}</span><strong>{m.title}</strong><small>{m.description}</small><span className="topic-bottom">{m.screening.length} grunnspørsmål · fordypning valgfri</span></button>})}</div>
+          <div className="notice"><Info size={19}/><p>Resultatet skal vise nøyaktig hvilke områder som er kartlagt. Ikke-valgte områder blir ikke tolket som normale eller uten behov.</p></div>
+          <div className="bottom-actions"><button className="secondary" onClick={()=>navigate('intent')}><ArrowLeft size={17}/> Tilbake</button><button className="primary" disabled={!selectedTopics.length} onClick={()=>{setTopicIndex(0);navigate('screen')}}>Start valgte områder <ArrowRight size={17}/></button></div>
         </>}
-        {page==='deep' && <>
-          <p className="eyebrow">STEG 2 AV 3 · VALGFRI FORDYPNING</p><h1>Undersøk tryggheten nærmere</h1><p className="lead">Svar bare på det som er relevant. Ubesvarte spørsmål behandles som «ikke avklart».</p>
-          <section className="panel"><div className="panel-head"><h2>Fordypning: Trygghet og fall</h2><span className="count">{assessment.deepAnswered} av {assessment.deepTotal} avklart</span></div>{renderQuestions(deepQuestions)}</section>
-          <div className="bottom-actions"><button className="secondary" onClick={()=>navigate('screen')}><ArrowLeft size={17}/> Tilbake</button><button className="primary" onClick={()=>navigate('results')}>Se oppsummering <ArrowRight size={17}/></button></div>
+        {page==='screen'&&<>
+          <p className="eyebrow">STEG 3 AV 4 · OMRÅDE {topicIndex+1} AV {selectedTopics.length}</p><h1>{current.title}</h1><p className="lead">{current.description} Alle spørsmål kan stå ubesvart; dette markeres som ikke avklart.</p>
+          <div className="module-progress">{selectedTopics.map((id,i)=><button key={id} className={i===topicIndex?'active':''} onClick={()=>startModule(id)} aria-label={'Gå til '+moduleById[id].title} title={moduleById[id].title}>{i+1}</button>)}</div>
+          <div className="mode-switch" aria-label="Kartleggingsmodus"><button className={mode==='quick'?'selected':''} aria-pressed={mode==='quick'} onClick={()=>setMode('quick')}>Hurtigkartlegging</button><button className={mode==='deep'?'selected':''} aria-pressed={mode==='deep'} onClick={()=>setMode('deep')}>Med fordypning</button></div>
+          <section className="panel"><div className="panel-head"><div><p className="eyebrow">INNLEDENDE SPØRSMÅL</p><h2>Hva mestrer brukeren?</h2></div><span className="count">{screenAnswered} av {current.screening.length} avklart</span></div>{renderQuestions(current.screening)}</section>
+          <div className="subtle-panel"><div><h3>Behov for mer informasjon?</h3><p>Åpne fordypning med relevante spørsmål, eller gå videre uten å miste svarene.</p></div><button className="secondary" onClick={openDeep}>Åpne fordypning <ArrowRight size={17}/></button></div>
+          <div className="bottom-actions"><button className="secondary" onClick={()=>topicIndex===0?navigate('topics'):startModule(selectedTopics[topicIndex-1])}><ArrowLeft size={17}/> {topicIndex===0?'Områder':'Forrige område'}</button><button className="primary" onClick={()=>mode==='deep'?openDeep():nextModule()}>{mode==='deep'?'Fordypning':topicIndex+1===selectedTopics.length?'Se oppsummering':'Neste område'} <ArrowRight size={17}/></button></div>
+          <button className="text-link" onClick={()=>navigate('results')}>Avslutt kartleggingen og se foreløpig oppsummering</button>
         </>}
-        {page==='results' && <>
-          <p className="eyebrow">STEG 3 AV 3</p><h1>Oppsummering</h1><p className="lead">Et foreløpig grunnlag for videre faglig vurdering – ikke en beslutning om tjenester eller valg av teknologi.</p>
-          <div className="results-metrics"><div><span>{assessment.screeningAnswered} / {assessment.screeningTotal}</span><small>Innledende spørsmål avklart</small></div><div><span>{assessment.deepAnswered} / {assessment.deepTotal}</span><small>Fordypningsspørsmål avklart</small></div><div><span>{assessment.suggestions.length}</span><small>Mulige tiltak å vurdere</small></div></div>
-          <section className="panel"><h2>Brukerens perspektiv</h2><p className="muted">Viktige mål: {goals.length?goals.join(', '):'Ikke kartlagt'}</p><p className="muted">Teknologi: {attitudes.find(a=>a.value===attitude)?.label}</p><p className="muted">Hjemmebesøk: {visitImportance.find(a=>a.value===visits)?.label}</p></section>
+        {page==='deep'&&<>
+          <p className="eyebrow">STEG 3 AV 4 · VALGFRI FORDYPNING</p><h1>Fordypning: {current.title}</h1><p className="lead">Systemet viser spørsmål som kan være relevante ut fra det som allerede er kartlagt. Du kan alltid åpne alle.</p>
+          <section className="panel"><div className="panel-head"><h2>Oppfølgingsspørsmål</h2><span className="count">{current.deep.filter(q=>answers[q.id]&&answers[q.id]!=='unknown').length} av {current.deep.length} avklart</span></div>
+            {filteredDeep.length?renderQuestions(filteredDeep):<p className="muted">Ingen spesifikke fordypningsspørsmål er aktivert av svarene så langt. Du kan gå videre eller vise alle spørsmål.</p>}
+            {!showAllDeep.includes(current.id)&&<button className="secondary show-all" onClick={()=>setShowAllDeep(p=>[...p,current.id])}>Vis alle {current.deep.length} fordypningsspørsmål</button>}
+          </section>
+          <div className="bottom-actions"><button className="secondary" onClick={()=>navigate('screen')}><ArrowLeft size={17}/> Tilbake</button><button className="primary" onClick={nextModule}>{topicIndex+1===selectedTopics.length?'Se oppsummering':'Neste område'} <ArrowRight size={17}/></button></div>
+          <button className="text-link" onClick={()=>navigate('results')}>Avslutt kartleggingen og se foreløpig oppsummering</button>
+        </>}
+        {page==='results'&&<>
+          <p className="eyebrow">STEG 4 AV 4</p><h1>Oppsummering</h1><p className="lead">Foreløpig støtte til videre faglige vurderinger – ikke en automatisert beslutning om tjenester eller teknologi.</p>
+          <div className="results-metrics"><div><span>{assessment.coverage.length} / 8</span><small>Valgte områder</small></div><div><span>{assessment.screeningAnswered} / {assessment.screeningTotal}</span><small>Grunnspørsmål avklart</small></div><div><span>{assessment.deepAnswered} / {assessment.deepTotal}</span><small>Fordypning avklart</small></div></div>
+          <section className="panel"><h2>Brukerens perspektiv</h2><p className="muted">Viktige mål: {goals.length?goals.join(', '):'Ikke kartlagt'}</p><p className="muted">Holdning til teknologi: {attitudes.find(a=>a.value===attitude)?.label}</p><p className="muted">Betydning av hjemmebesøk: {visitImportance.find(a=>a.value===visits)?.label}</p></section>
+          <section className="panel"><h2>Omfang og avklaringer</h2><div className="coverage-grid">{modules.map(m=>{const c=assessment.coverage.find(x=>x.id===m.id);return <div className={'coverage-card '+(!c?'unassessed':'')} key={m.id}><strong>{m.title}</strong><small>{c?c.screeningAnswered+' av '+c.screeningTotal+' grunnspørsmål avklart':'Ikke kartlagt'}</small></div>})}</div></section>
           <section className="panel"><h2>Identifiserte behov</h2>{assessment.needs.length?<ul className="plain-list">{assessment.needs.map(n=><li key={n}><span className="list-dot"/>{n}</li>)}</ul>:<p className="muted">Ingen konkrete utfordringer identifisert gjennom besvarte spørsmål. Dette utelukker ikke behov.</p>}</section>
           <div className="section-title"><h2>Mulige tiltak for videre vurdering</h2></div>
-          {assessment.suggestions.length?<div className="results-list">{assessment.suggestions.map(s=><article key={s.id} className="result-card"><div className="result-top"><span className={'tag '+(s.kind==='technology'?'tech':'')}>{s.kind==='technology'?'Velferdsteknologi':'Annet tiltak'}</span></div><h3>{s.title}</h3><p>{s.reason}</p>{s.caution&&<div className="caution"><Info size={17}/>{s.caution}</div>}<details><summary>Hva må vurderes videre?</summary><ul>{s.considerations.map(c=><li key={c}>{c}</li>)}</ul></details></article>)}</div>:<div className="panel"><p className="muted">Ingen tiltak foreslått på foreliggende grunnlag. Vurder behov for ytterligere kartlegging.</p></div>}
-          <section className="panel"><h2>Manglende informasjon og videre avklaringer</h2>{assessment.unknowns.length?<ul className="plain-list">{assessment.unknowns.map(n=><li key={n}><span className="list-dot"/>{n}</li>)}</ul>:<p className="muted">Ingen ubesvarte punkter i dette begrensede spørsmålssettet. Faglig vurdering kreves fortsatt.</p>}</section>
-          <div className="notice"><Info size={19}/><p>Prototypen er ikke kvalitetssikret for klinisk bruk. Ingen resultater er lagret eller sendt til en server. Bruk bare fiktive opplysninger.</p></div>
-          <div className="bottom-actions"><button className="secondary" onClick={()=>navigate('deep')}><ArrowLeft size={17}/> Endre kartlegging</button><button className="secondary" onClick={()=>{if(window.confirm('Slette alle svar og starte på nytt?'))reset()}}><RotateCcw size={17}/> Nullstill</button></div>
+          {assessment.suggestions.length?<div className="results-list">{assessment.suggestions.map(s=><article key={s.id} className="result-card"><span className={'tag '+(s.kind==='technology'?'tech':'')}>{s.kind==='technology'?'Velferdsteknologi':'Annet tiltak'}</span><h3>{s.title}</h3><p>{s.reason}</p>{s.caution&&<div className="caution"><Info size={17}/>{s.caution}</div>}<details><summary>Hva må vurderes videre?</summary><ul>{s.considerations.map(c=><li key={c}>{c}</li>)}</ul></details></article>)}</div>:<div className="panel"><p className="muted">Ingen tiltak foreslått på foreliggende grunnlag. Vurder videre kartlegging ved behov.</p></div>}
+          <section className="panel"><h2>Ikke avklart / videre spørsmål</h2>{assessment.unknowns.length?<ul className="plain-list">{assessment.unknowns.map(n=><li key={n}><span className="list-dot"/>{n}</li>)}</ul>:<p className="muted">Ingen uavklarte grunnspørsmål i valgte områder. Det betyr ikke at en fullstendig faglig vurdering er gjennomført.</p>}</section>
+          <div className="notice"><Info size={19}/><p>Ikke klinisk validert. Bruk bare fiktive opplysninger. Besvarelsene holdes kun i minnet mens siden er åpen og lagres ikke sentralt.</p></div>
+          <div className="bottom-actions"><button className="secondary" onClick={()=>navigate('topics')}><ArrowLeft size={17}/> Endre områder</button><button className="secondary" onClick={()=>{if(window.confirm('Slette alle svar og starte på nytt?'))reset()}}><RotateCcw size={17}/> Nullstill svar</button></div>
         </>}
-        {page==='library' && <><p className="eyebrow">TILTAKSBIBLIOTEK</p><h1>Muligheter, ikke fasitsvar</h1><p className="lead">Generelle teknologityper og andre tiltak som kan være aktuelle. Biblioteket er foreløpig og ikke knyttet til bestemte leverandører.</p><div className="results-list">{services.map(s=><article className="result-card" key={s.title}><h3>{s.title}</h3><p>{s.detail}</p><span className="tag">Krever individuell vurdering</span></article>)}</div></>}
-        <footer>HjemmeKompass · Faglig prototype v0.1 · Ingen identifiserende opplysninger · Ingen lagring av svar</footer>
+        {page==='library'&&<><p className="eyebrow">TILTAKSBIBLIOTEK</p><h1>Muligheter, ikke fasitsvar</h1><p className="lead">Generelle tiltakstyper, uten produkt- eller leverandøranbefaling. Valg av tiltak krever individuell faglig vurdering.</p><div className="results-list">{libraryEntries.map(([name,detail])=><article className="result-card" key={name}><h3>{name}</h3><p>{detail}</p><span className="tag">Krever individuell vurdering</span></article>)}</div></>}
+        <footer>HjemmeKompass · Faglig prototype v0.2 · Kun fiktive caser · Ingen lagring av svar</footer>
       </div>
     </main>
   </div>
