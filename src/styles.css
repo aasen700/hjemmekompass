@@ -39,3 +39,21 @@
 .bottom-actions{gap:9px}
 .bottom-actions .primary,.bottom-actions .secondary{font-size:12px;padding:12px 9px}
 }
+
+/* Reset is available throughout an active assessment, including mobile. */
+.top-actions{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.reset-header{display:inline-flex;align-items:center;justify-content:center;gap:7px;background:#faf5ef;border:1px solid #e8d9c9;color:#85684e;border-radius:10px;min-height:42px;padding:9px 13px;font-size:12px;font-weight:700}
+.reset-header:hover{background:#f5e9de;border-color:#cdb49a}
+.reset-header:focus-visible{outline:3px solid #4e9c83;outline-offset:3px}
+@media(max-width:700px){
+ .topbar{gap:8px}
+ .topbar .top-pill{display:none}
+ .breadcrumb{min-width:0;flex:1;overflow:hidden;white-space:nowrap}
+ .breadcrumb strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .top-actions{gap:0}
+ .reset-header{min-height:42px;padding:9px 10px;font-size:11px}
+}
+@media(max-width:380px){
+ .reset-header span{display:none}
+ .reset-header{min-width:42px}
+}
