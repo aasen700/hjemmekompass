@@ -149,3 +149,10 @@ footer strong{font-weight:700;color:#718c7a}
 .library-loadmore{width:100%}
 footer{flex-direction:column}
 }
+
+.library-quickfind{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin:14px 0 5px}
+.library-quickfind>span{font-size:12px;font-weight:800;color:#789281;margin-right:4px}
+.library-quickfind button{border:1px solid #d7e6d8;border-radius:100px;background:#f0f6ef;color:#4c7960;padding:9px 12px;font-size:12px;font-weight:700}
+.library-quickfind button:hover{background:#e0ecdf}
+.library-quickfind button:focus-visible{outline:3px solid #4e9c83;outline-offset:2px}
+@media(max-width:700px){.library-quickfind{gap:6px}.library-quickfind button{font-size:11px;padding:8px 10px}}
