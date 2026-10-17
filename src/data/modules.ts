@@ -1,4 +1,5 @@
 import { fourChoices, threeChoices, type Answers, type Question } from './assessment'
+import { detailedQuestions } from './detailedQuestions'
 
 export type AssessmentModule = {
   id: string
@@ -12,7 +13,7 @@ const yesNo = threeChoices
 const yesPartial = fourChoices
 
 /** Uvalidert faglig prototype – spørsmålene er ikke et klinisk screeninginstrument. */
-export const modules: AssessmentModule[] = [
+const baseModules: AssessmentModule[] = [
   {
     id: 'fall', title: 'Trygghet og fall', description: 'Opplevd trygghet, fall og mulighet for å tilkalle hjelp.',
     screening: [
@@ -117,6 +118,8 @@ export const modules: AssessmentModule[] = [
     ]
   }
 ]
+
+export const modules: AssessmentModule[] = baseModules.map(m => ({...m, deep: [...m.deep, ...(detailedQuestions[m.id] ?? [])]}))
 
 export const moduleById: Record<string, AssessmentModule> = Object.fromEntries(modules.map(m => [m.id, m]))
 export const allQuestions = modules.flatMap(m => [...m.screening, ...m.deep])
