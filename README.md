@@ -1,12 +1,12 @@
 # HjemmeKompass
 
-**Prototype v0.4 – kun til bruk med fiktive caser. Ikke klinisk validert.**
+**Prototype v0.5 – fiktive caser, ikke klinisk validert eller juridisk godkjent.**
 
-Personsentrert, mobiltilpasset kartlegging og regelbasert beslutningsstøtte for ansatte i hjemmesykepleien.
+Personsentrert kartlegging og regelbasert beslutningsstøtte for ansatte i hjemmesykepleien. Mobil først.
 
 ## Kjør lokalt
 
-Node.js 20+.
+Krever Node.js 20+.
 
 ~~~bash
 npm install
@@ -15,30 +15,39 @@ npm run test
 npm run build
 ~~~
 
-## Dette er utviklet
-- Åtte kartleggingsområder, valgfri hurtigkartlegging og dynamisk fordypning.
-- Brukerens mål, ressurser, holdning til teknologi og betydningen av sosiale hjemmebesøk.
-- Etterprøvbar, regelbasert kobling fra svar til mulige teknologiske og ikke-teknologiske tiltak.
-- Foreløpig resultatoversikt som viser kartleggingsomfang, ubesvarte områder og status for videre drøfting.
-- Søkbart, filtrerbart tiltaksbibliotek med rundt 85 oppslag om velferdsteknologi, praktiske hjelpemidler og andre tiltak; navigasjon i mobilvennlige grupper, risiko/forutsetninger, alternativer og kildelenker.
-- Egne oppslag for blant annet toalettstol (dostol), søsterhjelp og Doff N’ Donner til kompresjonsstrømper.
-- Synlig kreditering av initiativtaker og skaper Maritha Remes Vestbø, helsefagarbeider med lang erfaring fra hjemmesykepleien og engasjement for velferdsteknologi.
-- Veiledningsside med faglige prinsipper og avgrensninger.
-- Ingen backend, innlogging, pasientprofiler eller sentral lagring; besvarelsene lever kun i appens minne mens siden er åpen.
+## Funksjoner
 
-## Filer
-- src/data/modules.ts: spørsmål og dynamiske fordypningsregler
-- src/engine/recommendations.ts: beslutningsstøtte
-- src/data/library.ts og src/data/expandedCatalog.ts: tiltaksbibliotek og lenker til eksterne kilder
-- src/components/LibraryExplorer.tsx: søk, filtrering og detaljsider
-- src/components/GuidePage.tsx: introduksjon og faglige grenser
-- src/App.tsx: brukerflyt og oppsummering
-- docs/produktplan-v1.md: krav før faglig testing
+- Åtte kartleggingsområder og flere konkrete fordypningsspørsmål om funksjon, trygghet, medisiner, ernæring, stell, aktivitet, sosiale ønsker og digital mestring.
+- Brukerens mål, ressurser, holdning til teknologi og betydningen av sosial kontakt.
+- **Tilpasset beslutningsstøtte:** 87 biblioteksoppslag er ikke 87 forslag. Kun svar som er eksplisitt registrert og er relevante for valgte områder, kan aktivere en regel.
+- Regler angir hvilke svar som er grunnlaget for et mulig tiltak, hvilke forutsetninger som må kontrolleres, og om særskilt faglig vurdering er nødvendig.
+- Kjente negative forutsetninger kan sperre for uegnede teknologiforslag. «Ønsker ikke teknologi» gjør at ingen teknologiske løsninger foreslås.
+- Fordypningssvar som ikke lenger stemmer med grunnsvar, blir ikke brukt som grunnlag for forslag uten videre avklaring.
+- Resultatet viser inntil seks tiltak av gangen med mulighet til å vise flere **faktisk begrunnede** alternativer. Maks to per konkret behov.
+- Søkbart bibliotek med **87 oppslag**: velferdsteknologi, praktiske hjelpemidler, ikke-teknologiske tiltak, avklaringspunkter, begrensninger, alternativer og lenker til offentlig fagstoff.
+- Egen side for faglig og juridisk grunnlag, med lenker til Helsedirektoratet, Helsetilsynet og Normen.
+- Manuelle markeringer for videre drøfting er ikke vedtak og ikke journalføring.
+- Kontakt i bunnteksten til **Maritha Remes Vestbø**, skaperen av verktøyet.
+- Ingen backend, innlogging, pasientprofiler eller sentral lagring; svar holdes kun midlertidig i appminnet.
 
-## Viktige forbehold
+## Struktur
 
-Spørsmålene og beslutningsreglene er **faglige utkast** og må kildekontrolleres og gjennomgås av relevant fagpersonell før bruk med pasienter. Ikke legg inn ekte helseopplysninger. Det at verktøyet ikke spør etter navn, innebærer ikke i seg selv at opplysningene er anonyme.
+- src/data/modules.ts og src/data/detailedQuestions.ts: kartlegging og fordypning
+- src/engine/matching.ts: positivt svargrunnlag, eksklusjoner, faglige avklaringer og filtrering
+- src/engine/consistency.ts: kontroll av endrede og motstridende svar
+- src/engine/recommendations.ts: behov og kartleggingsomfang (eldre regelgrunnlag; erstattes gradvis av matching for tiltak)
+- src/data/library.ts og src/data/expandedCatalog.ts: tiltak og kilder
+- src/components/TailoredResults.tsx: forklarbart resultat
+- src/components/LibraryExplorer.tsx: søk, filtrering og tiltaksbeskrivelser
+- src/components/GuidePage.tsx og src/components/LegalPage.tsx: forklaring og faglig/juridisk kontekst
+- docs/faglig-juridisk-gjennomgang-2026.md: kildebasert kontrollmatrise, begrensninger og gjenstående krav
 
-HjemmeKompass diagnostiserer ikke, gir ikke risikoskår, vurderer ikke beslutningskompetanse eller om tjenester er forsvarlige, og tildeler ikke helse- og omsorgstjenester.
+## Viktige sikkerhetsgrenser
 
-Godkjent virksomhetsbruk krever avklaring av lovgrunnlag, personvern, informasjonssikkerhet, lokal ansvarsfordeling, prosedyreverk, opplæring og dokumentasjon. GitHub Actions kjører automatiske tester og bygg under utviklingen.
+**Dette er ingen godkjent eller validert klinisk løsning.** Ikke legg inn ekte pasientopplysninger. Informasjon kan være identifiserende selv uten navn. Prosjektet lagrer ikke brukerbesvarelser, men det gjør ikke den åpne prototypen egnet for reelle helseopplysninger.
+
+HjemmeKompass diagnostiserer ikke, beregner ikke klinisk risikoskår, avgjør ikke beslutningskompetanse, lovlighet, forsvarlighet, medisindosering eller rett til tjenester.
+
+Kildegjennomgangen dekker relevante **generelle nasjonale regler og faglige hovedprinsipper**, ikke individuell sertifisering av samtlige 87 tiltakstekster eller regler. Før eventuell bruk med reelle personer kreves tverrfaglig faglig og juridisk kvalitetssikring, vurdering av informasjonssikkerhet/personvern og nødvendige lokale godkjenninger og prosesser.
+
+Automatiske tester og bygg kjøres i GitHub Actions.
