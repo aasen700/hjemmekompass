@@ -64,6 +64,12 @@ describe('tilpasset beslutningsstøtte – klinisk ikke-validert prototype',()=>
     expect(ids({social_video:'yes',social_network:'no'},['social'])).not.toContain('video-calls')
     expect(ids({social_video:'yes',social_network:'yes'},['social'])).toContain('video-calls')
   })
+  it('ignorerer detaljerte svar dersom et eksplisitt motsigende grunnsvar er registrert',()=>{
+    const answers={selfcare_difficulty:'no',selfcare_compression:'yes',selfcare_toilet_distance:'yes'}
+    const result=ids(answers,['selfcare'])
+    expect(result).not.toContain('compression-doff')
+    expect(result).not.toContain('toilet-commode')
+  })
   it('filtrerer ut forslag med manglende definisjoner eller spørsmål',()=>{
     const solutionIds=new Set(solutions.map(s=>s.id))
     const questionIds=new Set(allQuestions.map(q=>q.id))
