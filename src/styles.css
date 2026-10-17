@@ -129,3 +129,23 @@
 .review-choice span{font-size:12px;font-weight:800;color:#567561}
 .review-choice select{background:#f5f8f3;border:1px solid #d8e6d9;border-radius:9px;min-height:45px;padding:10px 12px;color:#3c654a;font-size:13px;max-width:100%}
 .review-choice select:focus-visible{outline:3px solid #4e9c83;outline-offset:2px}
+
+/* v0.4 – keep a large intervention library comfortable on handheld devices */
+.creator-section{display:flex;gap:23px;align-items:flex-start;background:#e8f0e6;border:1px solid #d9e8d8;border-radius:20px;padding:28px;margin:25px 0 24px;max-width:900px}
+.creator-symbol{display:grid;place-items:center;flex-shrink:0;width:62px;height:62px;background:#d5e5d5;border-radius:18px;color:#426e55}
+.creator-copy h2{margin:2px 0 5px;font-size:26px;color:#355843}
+.creator-copy .creator-role{font-weight:700;color:#518168;font-size:13px;margin:0 0 16px}
+.creator-copy>p:not(.eyebrow){font-size:13px;color:#607a68;line-height:1.8}
+.creator-copy .creator-note{margin-bottom:0;color:#84998b!important;font-size:12px!important}
+.library-loadmore{display:flex;margin:25px auto 12px;gap:10px}
+.knowledge-card .tag:not(.tech){background:#f2f0e6;color:#7d745e}
+.knowledge-category{letter-spacing:.01em}
+footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+footer strong{font-weight:700;color:#718c7a}
+@media(max-width:700px){
+.creator-section{padding:21px;gap:14px;flex-direction:column}
+.creator-symbol{width:50px;height:50px}
+.creator-copy h2{font-size:22px}
+.library-loadmore{width:100%}
+footer{flex-direction:column}
+}

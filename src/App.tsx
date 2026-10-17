@@ -118,7 +118,7 @@ export default function App() {
         </>}
         {page==='library'&&<LibraryExplorer key={libraryItemId??'catalog'} initialId={libraryItemId} onReturnToAssessment={selectedTopics.length?()=>navigate('results'):undefined}/>}
         {page==='guide'&&<GuidePage startAssessment={()=>navigate('intent')} openLibrary={()=>{setLibraryItemId(null);navigate('library')}}/>}
-        <footer>HjemmeKompass · Faglig prototype v0.3 · Kun fiktive caser · Ingen lagring av svar</footer>
+        <footer><span>HjemmeKompass · Faglig prototype v0.4 · Kun fiktive caser</span><span>Initiativtaker og skaper: <strong>Maritha Remes Vestbø</strong></span></footer>
       </div>
     </main>
   </div>
