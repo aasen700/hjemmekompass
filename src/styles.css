@@ -57,3 +57,69 @@
  .reset-header span{display:none}
  .reset-header{min-width:42px}
 }
+
+
+/* v0.3 – extended content UX and intervention knowledge library */
+.home-guide-link{display:inline-flex;align-items:center;gap:8px;margin-left:16px}
+.library-toolbar{display:flex;gap:12px;margin:25px 0 16px}
+.library-search,.library-filter{background:#fff;border:1px solid #dce9df;border-radius:12px;display:flex;align-items:center;gap:10px;padding:0 14px;color:#72917b;min-height:51px}
+.library-search{flex:1}
+.library-search input{outline:none;border:none;background:transparent;min-width:0;flex:1;color:#315141;font-size:14px}
+.library-search:focus-within,.library-filter:focus-within{border-color:#5b957a;box-shadow:0 0 0 3px #dbeade}
+.library-filter select{max-width:190px;outline:none;border:none;background:transparent;color:#426552;font-size:13px;font-weight:700;padding:10px 0}
+.library-type-tabs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:17px}
+.library-type-tabs button{border:1px solid #dde8dd;border-radius:100px;background:#fff;padding:10px 15px;font-size:12px;font-weight:700;color:#6b8674}
+.library-type-tabs button.selected{background:#436e59;color:white;border-color:#436e59}
+.library-count{display:flex;align-items:center;gap:7px;font-size:12px;color:#668771;margin-bottom:18px}
+.knowledge-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.knowledge-card{display:flex;flex-direction:column;align-items:flex-start;gap:12px;min-height:225px;border:1px solid #e2eae1;border-radius:16px;padding:20px;background:#fff;text-align:left;transition:border-color .15s,transform .15s}
+.knowledge-card:hover{border-color:#9dc4a7;transform:translateY(-2px)}
+.knowledge-card:focus-visible{outline:3px solid #4e9c83;outline-offset:2px}
+.knowledge-card-top{width:100%;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px}
+.knowledge-category{font-size:11px;font-weight:700;color:#6e947f}
+.knowledge-card strong{font:800 16px Manrope,sans-serif;letter-spacing:-.035em;color:#314c3d}
+.knowledge-card-intro{font-size:12px;line-height:1.6;color:#7c8d82}
+.knowledge-card-foot{margin-top:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:#50795d;font-weight:700}
+.knowledge-back{display:inline-flex;align-items:center;gap:8px;margin-bottom:23px}
+.knowledge-heading{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.knowledge-detail h2{font-size:clamp(29px,3vw,41px);margin-top:15px}
+.knowledge-detail .lead{max-width:800px}
+.knowledge-highlight{display:flex;gap:14px;background:#eaf3e8;border:1px solid #dcebdc;border-radius:14px;padding:21px;margin:20px 0 24px;color:#4d785e}
+.knowledge-highlight svg{flex-shrink:0}
+.knowledge-highlight strong{color:#32513b;font-size:14px}
+.knowledge-highlight p{margin:6px 0 0;line-height:1.65;font-size:13px}
+.knowledge-sections{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.knowledge-section{margin:0}
+.knowledge-section h3{font-size:17px;margin-bottom:12px}
+.knowledge-section p{color:#718575;font-size:13px;line-height:1.75}
+.knowledge-points{padding-left:18px;color:#637a68;margin:13px 0 0}
+.knowledge-points li{font-size:13px;line-height:1.7;padding-left:4px;margin-bottom:10px}
+.knowledge-sources{margin-top:14px}
+.knowledge-sources ul{list-style:none;margin:15px 0 0;padding:0;display:grid;gap:9px}
+.knowledge-sources li a{display:inline-flex;gap:7px;align-items:center;font-size:13px;color:#426e5a;text-decoration:underline;text-underline-offset:3px}
+.library-empty{padding:25px}
+.result-library-link{background:#eff5ee;color:#427153;border:1px solid #dfebdf;border-radius:9px;display:inline-flex;gap:7px;align-items:center;margin-top:12px;padding:10px 13px;font-size:12px;font-weight:700}
+.result-library-link:hover{background:#e2efe0}
+.guide-actions{display:flex;align-items:center;flex-wrap:wrap;gap:11px;margin-bottom:36px}
+.guide-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:25px 0 34px}
+.guide-tile{background:white;border:1px solid #e5ede4;border-radius:16px;padding:24px}
+.guide-tile-icon{display:grid;place-items:center;background:#e4efe4;border-radius:12px;color:#54795c;width:45px;height:45px;margin-bottom:18px}
+.guide-tile h3{color:#355343}
+.guide-tile p{color:#738676;font-size:13px;line-height:1.7}
+.guide-principles{max-width:900px}
+.guide-rule{display:flex;align-items:flex-start;gap:14px;border-top:1px solid #e7eee5;padding:19px 0}
+.guide-rule svg{flex-shrink:0;color:#659077}
+.guide-rule strong{font-size:14px;color:#365443}
+.guide-rule p{font-size:13px;line-height:1.7;color:#778a7b;margin:5px 0 0}
+@media(max-width:1050px){.knowledge-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){
+.home-guide-link{display:flex;margin:14px 0 0}
+.library-toolbar{flex-direction:column}
+.library-filter select{max-width:none;flex:1}
+.knowledge-grid{grid-template-columns:1fr}
+.knowledge-card{min-height:170px}
+.knowledge-sections{grid-template-columns:1fr}
+.guide-grid{grid-template-columns:1fr}
+.guide-tile{padding:19px}
+.library-type-tabs button{padding:10px 12px}
+}

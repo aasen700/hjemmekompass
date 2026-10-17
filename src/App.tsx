@@ -3,21 +3,13 @@ import { Activity, Apple, ArrowLeft, ArrowRight, BookOpen, Brain, Check, Chevron
 import { attitudes, priorities, visitImportance, type Answers, type AssessmentMode, type Question } from './data/assessment'
 import { modules, moduleById, suggestedDeepQuestions, type AssessmentModule } from './data/modules'
 import { makeAssessment } from './engine/recommendations'
+import { findSolutionForSuggestion } from './data/library'
+import LibraryExplorer from './components/LibraryExplorer'
+import GuidePage from './components/GuidePage'
 
-type Page = 'home' | 'intent' | 'topics' | 'screen' | 'deep' | 'results' | 'library'
-const pageTitle: Record<Page, string> = { home: 'Hjem', intent: 'Brukerens ønsker', topics: 'Velg områder', screen: 'Kartlegging', deep: 'Fordypning', results: 'Oppsummering', library: 'Tiltaksbibliotek' }
+type Page = 'home' | 'intent' | 'topics' | 'screen' | 'deep' | 'results' | 'library' | 'guide'
+const pageTitle: Record<Page, string> = { home: 'Hjem', intent: 'Brukerens ønsker', topics: 'Velg områder', screen: 'Kartlegging', deep: 'Fordypning', results: 'Oppsummering', library: 'Tiltaksbibliotek', guide: 'Om verktøyet' }
 const icons = [ShieldCheck, Pill, Shirt, Apple, Brain, Users, Activity, Monitor]
-const libraryEntries = [
-  ['Digital trygghetsalarm','Mulighet til å varsle ved behov; krever vurdering av brukerens betjeningsevne og responstjeneste.'],
-  ['Fallsensor','Kan registrere enkelte fall og utløse varsel, men forebygger ikke fall og kan unnlate å varsle.'],
-  ['Automatisk nattlys','Kan bedre oversikten i mørke omgivelser, men løser ikke andre årsaker til fall.'],
-  ['Elektronisk medisindispenser','Kan gi påminnelser og utlevering etter etablerte rutiner; krever forsvarlig legemiddelhåndtering og oppfølging.'],
-  ['Digital kalender og dagsplan','Kan støtte struktur og påminnelser dersom informasjonen kan forstås og brukes.'],
-  ['Enkel løsning for videosamtaler','Kan støtte ønsket sosial kontakt når mottaker, utstyr og digital mestring er avklart.'],
-  ['Digitalt tilsyn','Kan vurderes ved konkret tilsynsbehov; krever særskilt faglig, rettslig og personvernmessig vurdering.'],
-  ['Boligtilpasning og praktisk bistand','Ikke-teknologiske alternativer kan bidra til trygghet, mestring og gode hverdagsrutiner.']
-] as const
-
 function QuestionCard({ question, value, onChange }: { question: Question; value?: string; onChange: (value: string) => void }) {
   return <fieldset className="question">
     <legend>{question.title}</legend>
@@ -38,6 +30,7 @@ export default function App() {
   const [deepVisited,setDeepVisited]=useState<string[]>([])
   const [showAllDeep,setShowAllDeep]=useState<string[]>([])
   const [menuOpen,setMenuOpen]=useState(false)
+  const [libraryItemId,setLibraryItemId]=useState<string|null>(null)
   const current: AssessmentModule = moduleById[selectedTopics[topicIndex] ?? 'fall']
   const assessment=useMemo(()=>makeAssessment(answers,attitude,visits,selectedTopics,deepVisited),[answers,attitude,visits,selectedTopics,deepVisited])
   const step=({intent:1,topics:2,screen:3,deep:3,results:4} as Partial<Record<Page,number>>)[page]??0
@@ -49,16 +42,17 @@ export default function App() {
   const openDeep=()=>{setDeepVisited(p=>p.includes(current.id)?p:[...p,current.id]);navigate('deep')}
   const reset=()=>{setAnswers({});setGoals([]);setAttitude('unknown');setVisits('unknown');setSelectedTopics([]);setTopicIndex(0);setMode('quick');setDeepVisited([]);setShowAllDeep([]);navigate('home')}
   const toggleTopic=(id:string)=>setSelectedTopics(p=>p.includes(id)?p.filter(x=>x!==id):modules.filter(m=>p.includes(m.id)||m.id===id).map(m=>m.id))
+  const openLibraryForSuggestion=(id:string)=>{const solution=findSolutionForSuggestion(id);if(!solution)return;setLibraryItemId(solution.id);navigate('library')}
   const toggleGoal=(value:string)=>setGoals(p=>p.includes(value)?p.filter(x=>x!==value):[...p,value])
   const renderQuestions=(items:Question[]) => <div className="questions">{items.map(q=><QuestionCard key={q.id} question={q} value={answers[q.id]} onChange={v=>setAnswer(q.id,v)}/>)}</div>
   const screenAnswered=current.screening.filter(q=>answers[q.id]&&answers[q.id]!=='unknown').length
   const filteredDeep=suggestedDeepQuestions(current,answers,showAllDeep.includes(current.id))
-  const showMenu=(target:Page)=>{if(target==='screen'){if(selectedTopics.length)startModule(selectedTopics[0]);else navigate('topics')}else navigate(target)}
+  const showMenu=(target:Page)=>{if(target==='library')setLibraryItemId(null);if(target==='screen'){if(selectedTopics.length)startModule(selectedTopics[0]);else navigate('topics')}else navigate(target)}
 
   return <div className="app">
     <aside className={'sidebar '+(menuOpen?'is-open':'')}>
       <button className="brand" onClick={()=>navigate('home')}><span className="brand-mark"><Compass size={23}/></span><span>Hjemme<span className="brand-light">Kompass</span><small>Kartlegging med mennesket i sentrum</small></span></button>
-      <nav aria-label="Hovedmeny">{([['home','Hjem',Home],['intent','Ny kartlegging',ClipboardList],['topics','Kartleggingsområder',ShieldCheck],['library','Tiltaksbibliotek',BookOpen],['results','Oppsummering',Lightbulb]] as const).map(([p,text,Icon])=><button key={p} className={'nav-link '+(page===p?'active':'')} onClick={()=>showMenu(p)}><Icon size={19}/>{text}</button>)}</nav>
+      <nav aria-label="Hovedmeny">{([['home','Hjem',Home],['intent','Ny kartlegging',ClipboardList],['topics','Kartleggingsområder',ShieldCheck],['library','Tiltaksbibliotek',BookOpen],['guide','Om verktøyet',Info],['results','Oppsummering',Lightbulb]] as const).map(([p,text,Icon])=><button key={p} className={'nav-link '+(page===p?'active':'')} onClick={()=>showMenu(p)}><Icon size={19}/>{text}</button>)}</nav>
       <div className="sidebar-foot"><Heart size={17}/><span>Teknologi skal støtte mennesker, ikke erstatte faglig skjønn.</span></div>
     </aside>
     {menuOpen&&<button className="scrim" onClick={()=>setMenuOpen(false)} aria-label="Lukk meny"/>}
@@ -66,7 +60,7 @@ export default function App() {
       <header className="topbar"><button className="mobile-menu icon-btn" aria-label="Åpne meny" onClick={()=>setMenuOpen(v=>!v)}>{menuOpen?<X/>:<Menu/>}</button><div className="breadcrumb">HjemmeKompass <ChevronRight size={14}/> <strong>{pageTitle[page]}</strong></div><div className="top-actions">{hasSession&&<button type="button" className="reset-header" aria-label="Tilbakestill hele kartleggingen" onClick={()=>{if(window.confirm("Tilbakestille hele kartleggingen? Alle svar og valg slettes og kan ikke gjenopprettes."))reset()}}><RotateCcw size={16} aria-hidden="true"/><span>Tilbakestill</span></button>}<span className="top-pill"><ShieldCheck size={15}/> Faglig prototype</span></div></header>
       <div className="content">
         {page==='home'&&<>
-          <div className="intro-row"><div><p className="eyebrow">VELKOMMEN TIL HJEMMEKOMPASS</p><h1>En tryggere vei til gode valg.</h1><p className="lead">Personsentrert kartlegging av trygghet, mestring, sosial kontakt og velferdsteknologi – til støtte for ansatte i hjemmesykepleien.</p><button className="primary" onClick={()=>navigate('intent')}>{hasSession?'Fortsett kartlegging':'Start kartlegging'} <ArrowRight size={17}/></button></div><div className="hero-art" aria-hidden="true"><div className="sun"/><div className="hill h1"/><div className="hill h2"/><div className="house"><div className="roof"/><div className="door"/></div><div className="path"/></div></div>
+          <div className="intro-row"><div><p className="eyebrow">VELKOMMEN TIL HJEMMEKOMPASS</p><h1>En tryggere vei til gode valg.</h1><p className="lead">Personsentrert kartlegging av trygghet, mestring, sosial kontakt og velferdsteknologi – til støtte for ansatte i hjemmesykepleien.</p><button className="primary" onClick={()=>navigate('intent')}>{hasSession?'Fortsett kartlegging':'Start kartlegging'} <ArrowRight size={17}/></button><button className="home-guide-link text-link" onClick={()=>navigate('guide')}>Slik brukes verktøyet <ArrowRight size={16}/></button></div><div className="hero-art" aria-hidden="true"><div className="sun"/><div className="hill h1"/><div className="hill h2"/><div className="house"><div className="roof"/><div className="door"/></div><div className="path"/></div></div>
           <div className="section-title"><div><p className="eyebrow">SLIK FUNGERER DET</p><h2>Fra behov til muligheter</h2></div></div>
           <div className="how-grid">{[['01','Brukerens perspektiv','Start med mål, ressurser og ønsker.'],['02','Kartlegg i eget tempo','Velg relevante temaer og valgfri fordypning.'],['03','Utforsk mulige tiltak','Se muligheter, forbehold og videre avklaringer.']].map(([n,t,d])=><div className="how-card" key={n}><span className="how-num">{n}</span><h3>{t}</h3><p>{d}</p></div>)}</div>
           <div className="section-title"><div><p className="eyebrow">KARTLEGGINGSOMRÅDER</p><h2>Åtte områder – velg selv</h2></div></div>
@@ -113,13 +107,14 @@ export default function App() {
           <section className="panel"><h2>Omfang og avklaringer</h2><div className="coverage-grid">{modules.map(m=>{const c=assessment.coverage.find(x=>x.id===m.id);return <div className={'coverage-card '+(!c?'unassessed':'')} key={m.id}><strong>{m.title}</strong><small>{c?c.screeningAnswered+' av '+c.screeningTotal+' grunnspørsmål avklart':'Ikke kartlagt'}</small></div>})}</div></section>
           <section className="panel"><h2>Identifiserte behov</h2>{assessment.needs.length?<ul className="plain-list">{assessment.needs.map(n=><li key={n}><span className="list-dot"/>{n}</li>)}</ul>:<p className="muted">Ingen konkrete utfordringer identifisert gjennom besvarte spørsmål. Dette utelukker ikke behov.</p>}</section>
           <div className="section-title"><h2>Mulige tiltak for videre vurdering</h2></div>
-          {assessment.suggestions.length?<div className="results-list">{assessment.suggestions.map(s=><article key={s.id} className="result-card"><span className={'tag '+(s.kind==='technology'?'tech':'')}>{s.kind==='technology'?'Velferdsteknologi':'Annet tiltak'}</span><h3>{s.title}</h3><p>{s.reason}</p>{s.caution&&<div className="caution"><Info size={17}/>{s.caution}</div>}<details><summary>Hva må vurderes videre?</summary><ul>{s.considerations.map(c=><li key={c}>{c}</li>)}</ul></details></article>)}</div>:<div className="panel"><p className="muted">Ingen tiltak foreslått på foreliggende grunnlag. Vurder videre kartlegging ved behov.</p></div>}
+          {assessment.suggestions.length?<div className="results-list">{assessment.suggestions.map(s=><article key={s.id} className="result-card"><span className={'tag '+(s.kind==='technology'?'tech':'')}>{s.kind==='technology'?'Velferdsteknologi':'Annet tiltak'}</span><h3>{s.title}</h3><p>{s.reason}</p>{findSolutionForSuggestion(s.id)&&<button type="button" className="result-library-link" onClick={()=>openLibraryForSuggestion(s.id)}>Les om tiltaket i biblioteket <ArrowRight size={15}/></button>}{s.caution&&<div className="caution"><Info size={17}/>{s.caution}</div>}<details><summary>Hva må vurderes videre?</summary><ul>{s.considerations.map(c=><li key={c}>{c}</li>)}</ul></details></article>)}</div>:<div className="panel"><p className="muted">Ingen tiltak foreslått på foreliggende grunnlag. Vurder videre kartlegging ved behov.</p></div>}
           <section className="panel"><h2>Ikke avklart / videre spørsmål</h2>{assessment.unknowns.length?<ul className="plain-list">{assessment.unknowns.map(n=><li key={n}><span className="list-dot"/>{n}</li>)}</ul>:<p className="muted">Ingen uavklarte grunnspørsmål i valgte områder. Det betyr ikke at en fullstendig faglig vurdering er gjennomført.</p>}</section>
           <div className="notice"><Info size={19}/><p>Ikke klinisk validert. Bruk bare fiktive opplysninger. Besvarelsene holdes kun i minnet mens siden er åpen og lagres ikke sentralt.</p></div>
           <div className="bottom-actions"><button className="secondary" onClick={()=>navigate('topics')}><ArrowLeft size={17}/> Endre områder</button><button className="secondary" onClick={()=>{if(window.confirm('Slette alle svar og starte på nytt?'))reset()}}><RotateCcw size={17}/> Nullstill svar</button></div>
         </>}
-        {page==='library'&&<><p className="eyebrow">TILTAKSBIBLIOTEK</p><h1>Muligheter, ikke fasitsvar</h1><p className="lead">Generelle tiltakstyper, uten produkt- eller leverandøranbefaling. Valg av tiltak krever individuell faglig vurdering.</p><div className="results-list">{libraryEntries.map(([name,detail])=><article className="result-card" key={name}><h3>{name}</h3><p>{detail}</p><span className="tag">Krever individuell vurdering</span></article>)}</div></>}
-        <footer>HjemmeKompass · Faglig prototype v0.2 · Kun fiktive caser · Ingen lagring av svar</footer>
+        {page==='library'&&<LibraryExplorer key={libraryItemId??'catalog'} initialId={libraryItemId} onReturnToAssessment={selectedTopics.length?()=>navigate('results'):undefined}/>}
+        {page==='guide'&&<GuidePage startAssessment={()=>navigate('intent')} openLibrary={()=>{setLibraryItemId(null);navigate('library')}}/>}
+        <footer>HjemmeKompass · Faglig prototype v0.3 · Kun fiktive caser · Ingen lagring av svar</footer>
       </div>
     </main>
   </div>
