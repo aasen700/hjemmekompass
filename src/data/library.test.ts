@@ -13,7 +13,7 @@ describe('tiltaksbibliotek v0.4', () => {
     expect(solutions.every(s=>s.title.trim()&&s.group.trim()&&s.intro.trim())).toBe(true)
   })
   it('every entry contains review information and linked source IDs', () => {
-    const ids=new Set(referenceLinks.map(x=>x.id))
+    const ids=new Set<string>(referenceLinks.map(x=>x.id))
     for(const s of solutions){
       expect(s.before.length).toBeGreaterThan(0)
       expect(s.limitations.length).toBeGreaterThan(0)
