@@ -123,3 +123,9 @@
 .guide-tile{padding:19px}
 .library-type-tabs button{padding:10px 12px}
 }
+
+/* v0.3: optional review notes in the result, never an automatic service decision */
+.review-choice{display:flex;flex-direction:column;gap:9px;margin-top:17px;padding-top:16px;border-top:1px solid #edf0e9}
+.review-choice span{font-size:12px;font-weight:800;color:#567561}
+.review-choice select{background:#f5f8f3;border:1px solid #d8e6d9;border-radius:9px;min-height:45px;padding:10px 12px;color:#3c654a;font-size:13px;max-width:100%}
+.review-choice select:focus-visible{outline:3px solid #4e9c83;outline-offset:2px}
