@@ -206,3 +206,15 @@ footer a{color:#4c7a5d;text-decoration:underline;text-underline-offset:3px;margi
 .legal-source a{margin-top:auto;display:inline-flex;align-items:center;gap:7px;flex-wrap:wrap;color:#44735a;font-size:12px;text-decoration:underline;text-underline-offset:3px}
 .legal-next{margin-top:23px;max-width:none}
 @media(max-width:700px){.legal-grid{grid-template-columns:1fr}.legal-source{padding:19px}.legal-alert{padding:15px}}
+
+/* v0.5 – not triage; explicit professional follow-up separate from matched solutions */
+.professional-flags{border-color:#ecdcc4;background:#fffefa}
+.professional-flags h2{margin-bottom:12px}
+.professional-flag{display:flex;gap:11px;align-items:flex-start;padding:17px 0;border-top:1px solid #f0e8de}
+.professional-flag:first-of-type{margin-top:17px}
+.professional-flag svg{color:#a07842;flex-shrink:0}
+.professional-flag strong{display:block;font-size:13px;color:#795b35}
+.professional-flag p{color:#867965;line-height:1.7;font-size:12px;margin:7px 0}
+.professional-flag a{font-size:12px;text-decoration:underline;color:#6f7651}
+.answer-conflict{border-color:#e8d8c9;background:#fdf8f2}
+.answer-conflict h2{display:flex;gap:9px;align-items:center;color:#936f3e}
