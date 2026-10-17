@@ -1,6 +1,6 @@
 # HjemmeKompass
 
-**Prototype v0.3 – kun til bruk med fiktive caser. Ikke klinisk validert.**
+**Prototype v0.4 – kun til bruk med fiktive caser. Ikke klinisk validert.**
 
 Personsentrert, mobiltilpasset kartlegging og regelbasert beslutningsstøtte for ansatte i hjemmesykepleien.
 
@@ -20,14 +20,16 @@ npm run build
 - Brukerens mål, ressurser, holdning til teknologi og betydningen av sosiale hjemmebesøk.
 - Etterprøvbar, regelbasert kobling fra svar til mulige teknologiske og ikke-teknologiske tiltak.
 - Foreløpig resultatoversikt som viser kartleggingsomfang, ubesvarte områder og status for videre drøfting.
-- Søkbart tiltaksbibliotek med 17 detaljerte oppslag og lenker til relevant offentlig fagstoff.
+- Søkbart, filtrerbart tiltaksbibliotek med rundt 85 oppslag om velferdsteknologi, praktiske hjelpemidler og andre tiltak; navigasjon i mobilvennlige grupper, risiko/forutsetninger, alternativer og kildelenker.
+- Egne oppslag for blant annet toalettstol (dostol), søsterhjelp og Doff N’ Donner til kompresjonsstrømper.
+- Synlig kreditering av initiativtaker og skaper Maritha Remes Vestbø, helsefagarbeider med lang erfaring fra hjemmesykepleien og engasjement for velferdsteknologi.
 - Veiledningsside med faglige prinsipper og avgrensninger.
 - Ingen backend, innlogging, pasientprofiler eller sentral lagring; besvarelsene lever kun i appens minne mens siden er åpen.
 
 ## Filer
 - src/data/modules.ts: spørsmål og dynamiske fordypningsregler
 - src/engine/recommendations.ts: beslutningsstøtte
-- src/data/library.ts: tiltaksbibliotek og eksterne kilder
+- src/data/library.ts og src/data/expandedCatalog.ts: tiltaksbibliotek og lenker til eksterne kilder
 - src/components/LibraryExplorer.tsx: søk, filtrering og detaljsider
 - src/components/GuidePage.tsx: introduksjon og faglige grenser
 - src/App.tsx: brukerflyt og oppsummering
