@@ -41,7 +41,7 @@ export default function LibraryExplorer({initialId,onReturnToAssessment}:Props) 
   const [query,setQuery]=useState('')
   const [category,setCategory]=useState('Alle områder')
   const [type,setType]=useState<'all'|'technology'|'aid'|'nontech'>('all')
-  const quickFind=[{label:'Dostol',query:'dostol'},{label:'Søsterhjelp',query:'søsterhjelp'},{label:'Støttestrømper',query:'støttestrømper'},{label:'GPS',query:'gps'},{label:'Forflytning',area:'Forflytning'},{label:'Bad og toalett',area:'Bad og toalett'}]
+  const quickFind=[{label:'Dostol',query:'dostol'},{label:'Søsterhjelp',query:'søsterhjelp'},{label:'Støttestrømper',query:'støttestrømpe'},{label:'GPS',query:'gps'},{label:'Forflytning',area:'Forflytning'},{label:'Bad og toalett',area:'Bad og toalett'}]
   const [visible,setVisible]=useState(12)
   const categories=['Alle områder',...new Set(solutions.map(s=>s.group))]
   const items=useMemo(()=>solutions.filter(s=>{
