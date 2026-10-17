@@ -5,11 +5,12 @@ import { modules, moduleById, suggestedDeepQuestions, type AssessmentModule } fr
 import { makeAssessment } from './engine/recommendations'
 import { getTailoredMatches } from './engine/matching'
 import TailoredResults from './components/TailoredResults'
+import LegalPage from './components/LegalPage'
 import LibraryExplorer from './components/LibraryExplorer'
 import GuidePage from './components/GuidePage'
 
-type Page = 'home' | 'intent' | 'topics' | 'screen' | 'deep' | 'results' | 'library' | 'guide'
-const pageTitle: Record<Page, string> = { home: 'Hjem', intent: 'Brukerens ønsker', topics: 'Velg områder', screen: 'Kartlegging', deep: 'Fordypning', results: 'Oppsummering', library: 'Tiltaksbibliotek', guide: 'Om verktøyet' }
+type Page = 'home' | 'intent' | 'topics' | 'screen' | 'deep' | 'results' | 'library' | 'guide' | 'legal'
+const pageTitle: Record<Page, string> = { home: 'Hjem', intent: 'Brukerens ønsker', topics: 'Velg områder', screen: 'Kartlegging', deep: 'Fordypning', results: 'Oppsummering', library: 'Tiltaksbibliotek', guide: 'Om verktøyet', legal: 'Faglig grunnlag' }
 const icons = [ShieldCheck, Pill, Shirt, Apple, Brain, Users, Activity, Monitor]
 function QuestionCard({ question, value, onChange }: { question: Question; value?: string; onChange: (value: string) => void }) {
   return <fieldset className="question">
@@ -57,7 +58,7 @@ export default function App() {
   return <div className="app">
     <aside className={'sidebar '+(menuOpen?'is-open':'')}>
       <button className="brand" onClick={()=>navigate('home')}><span className="brand-mark"><Compass size={23}/></span><span>Hjemme<span className="brand-light">Kompass</span><small>Kartlegging med mennesket i sentrum</small></span></button>
-      <nav aria-label="Hovedmeny">{([['home','Hjem',Home],['intent','Ny kartlegging',ClipboardList],['topics','Kartleggingsområder',ShieldCheck],['library','Tiltaksbibliotek',BookOpen],['guide','Om verktøyet',Info],['results','Oppsummering',Lightbulb]] as const).map(([p,text,Icon])=><button key={p} className={'nav-link '+(page===p?'active':'')} onClick={()=>showMenu(p)}><Icon size={19}/>{text}</button>)}</nav>
+      <nav aria-label="Hovedmeny">{([['home','Hjem',Home],['intent','Ny kartlegging',ClipboardList],['topics','Kartleggingsområder',ShieldCheck],['library','Tiltaksbibliotek',BookOpen],['guide','Om verktøyet',Info],['legal','Faglig grunnlag',ShieldCheck],['results','Oppsummering',Lightbulb]] as const).map(([p,text,Icon])=><button key={p} className={'nav-link '+(page===p?'active':'')} onClick={()=>showMenu(p)}><Icon size={19}/>{text}</button>)}</nav>
       <div className="sidebar-foot"><Heart size={17}/><span>Teknologi skal støtte mennesker, ikke erstatte faglig skjønn.</span></div>
     </aside>
     {menuOpen&&<button className="scrim" onClick={()=>setMenuOpen(false)} aria-label="Lukk meny"/>}
@@ -118,6 +119,7 @@ export default function App() {
           <div className="bottom-actions"><button className="secondary" onClick={()=>navigate('topics')}><ArrowLeft size={17}/> Endre områder</button><button className="secondary" onClick={()=>{if(window.confirm('Slette alle svar og starte på nytt?'))reset()}}><RotateCcw size={17}/> Nullstill svar</button></div>
         </>}
         {page==='library'&&<LibraryExplorer key={libraryItemId??'catalog'} initialId={libraryItemId} onReturnToAssessment={selectedTopics.length?()=>navigate('results'):undefined}/>}
+        {page==='legal'&&<LegalPage onLibrary={()=>{setLibraryItemId(null);navigate('library')}}/>}
         {page==='guide'&&<GuidePage startAssessment={()=>navigate('intent')} openLibrary={()=>{setLibraryItemId(null);navigate('library')}}/>}
         <footer><span>HjemmeKompass · Faglig prototype v0.5 · Kun fiktive caser</span><span>Skaper: <strong>Maritha Remes Vestbø</strong> <a href="tel:+4748456462">48 45 64 62</a> <a href="mailto:marithaov@icloud.com">marithaov@icloud.com</a></span></footer>
       </div>
