@@ -118,6 +118,14 @@ export function getTailoredMatches(
   const matchesEvidence=(criterion:Evidence)=>criterion.values.includes(get(criterion.id))
   for(const rule of matchingRules) {
     if(!included.has(rule.topic) || !rule.when.every(matchesEvidence))continue
+    // A retained detailed answer must not activate a measure after its parent answer has been changed to a conflicting explicit answer.
+    const parentContradiction=rule.when.some(signal=>{
+      const q=moduleById[rule.topic].deep.find(item=>item.id===signal.id)
+      if(!q?.when)return false
+      const parent=get(q.when.id)
+      return parent!=='unknown' && !q.when.values.includes(parent)
+    })
+    if(parentContradiction)continue
     if(rule.exclude?.some(matchesEvidence))continue
     const solution=solutionById.get(rule.solutionId)
     if(!solution)continue
