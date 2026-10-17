@@ -31,6 +31,16 @@ export const priorities = [
   'Annet / ønsker ikke å svare'
 ]
 
+/** Valgfrie styrker/ressurser som brukeren selv kan beskrive. */
+export const strengths = [
+  'Har rutiner som fungerer godt',
+  'Mestrer enkelte oppgaver selv',
+  'Har støtte fra familie eller nettverk',
+  'Har erfaring med digitale løsninger',
+  'Ønsker å lære eller prøve nye løsninger',
+  'Har hjelpemidler som fungerer godt'
+]
+
 export const attitudes = [
   { value: 'positive', label: 'Positiv til teknologi', detail: 'Åpen for å prøve nye løsninger.' },
   { value: 'unsure', label: 'Usikker', detail: 'Trenger informasjon eller støtte.' },
