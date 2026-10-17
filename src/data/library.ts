@@ -1,9 +1,10 @@
 /** Faglig informasjonsbibliotek. Uvalidert prototype, ikke kliniske anbefalinger. */
+import { expandedSolutions } from './expandedCatalog'
 export type Solution = {
   id: string
   title: string
-  group: 'Trygghet' | 'Legemidler' | 'Hverdag' | 'Sosial kontakt' | 'Aktivitet' | 'Digital mestring'
-  kind: 'technology' | 'nontech'
+  group: 'Trygghet' | 'Legemidler' | 'Hverdag' | 'Sosial kontakt' | 'Aktivitet' | 'Digital mestring' | 'Forflytning' | 'Bad og toalett' | 'Personlig stell' | 'Mat og ernæring' | 'Bolig og miljø' | 'Kommunikasjon' | 'Hukommelse og orientering' | 'Digital hjemmeoppfølging'
+  kind: 'technology' | 'aid' | 'nontech'
   intro: string
   need: string
   function: string
@@ -13,6 +14,7 @@ export type Solution = {
   followUp: string[]
   sourceIds: string[]
   suggestionIds?: string[]
+  searchTerms?: string[]
 }
 
 export const referenceLinks = [
@@ -21,10 +23,16 @@ export const referenceLinks = [
   { id: 'supervision', title: 'Helsetilsynet – Fremtidens omsorg: Innføring av velferdsteknologi (2025)', url: 'https://www.helsetilsynet.no/publikasjoner/tilsynsmeldingen/2025/fremtidens-omsorg-innfoering-velferdsteknologi-kommunene/' },
   { id: 'privacy', title: 'Normen – Informasjonssikkerhet og personvern ved velferdsteknologi', url: 'https://www.helsedirektoratet.no/normen/informasjonssikkerhet-og-personvern-ved-bruk-av-teknologi-i-kommuner-velferdsteknologi/innledning' },
   { id: 'digital-observation', title: 'Helsetilsynet – Vurderinger etter tilsyn med digitalt tilsyn og døralarm', url: 'https://www.helsetilsynet.no/tilsyn/tilsynssaker/2025/rapport-tilsynssak-bruk-digitalt-tilsyn-elektronisk-doeralarm/helsetilsynets-vurderinger?b=toc_1127215' },
-  { id: 'overview', title: 'Helsedirektoratet – Rapportering av velferdsteknologi', url: 'https://www.helsedirektoratet.no/veiledere/registrering-av-iplos-data-i-kommunen/rapportering-av-velferdsteknologi' }
+  { id: 'overview', title: 'Helsedirektoratet – Rapportering av velferdsteknologi', url: 'https://www.helsedirektoratet.no/veiledere/registrering-av-iplos-data-i-kommunen/rapportering-av-velferdsteknologi' },
+  { id: 'reporting', title: 'Helsedirektoratet – Definisjoner og rapportering av velferdsteknologi', url: 'https://www.helsedirektoratet.no/veiledere/registrering-av-iplos-data-i-kommunen/rapportering-av-velferdsteknologi' },
+  { id: 'nav-aids', title: 'NAV – Finn hjelpemiddel', url: 'https://finnhjelpemiddel.nav.no/' },
+  { id: 'nav-bed', title: 'NAV – Senger, madrasser, tilbehør og forflytning', url: 'https://www.nav.no/senger-og-madrasser' },
+  { id: 'nav-doff', title: 'NAV – Strømpepåtrekker Doff NDonner', url: 'https://finnhjelpemiddel.nav.no/produkt/6e53fe99-5b81-469d-b628-c43ff9fea55b' },
+  { id: 'sister', title: 'NAV – Bruksanvisning søsterhjelp / løftebøyle', url: 'https://finnhjelpemiddel.nav.no/imageproxy/file/brugsvejl/65464.pdf' },
+  { id: 'digital-health', title: 'Helsedirektoratet – Digital hjemmeoppfølging', url: 'https://www.helsedirektoratet.no/forebygging-diagnose-og-behandling/organisering-og-tjenestetilbud/velferdsteknologi-og-digital-hjemmeoppfolging' }
 ] as const
 
-export const solutions: Solution[] = [
+const coreSolutions: Solution[] = [
   {
     id: 'alarm', title: 'Digital trygghetsalarm', group: 'Trygghet', kind: 'technology',
     intro: 'Varslingsløsning som kan gjøre det mulig å be om hjelp fra hjemmet.',
@@ -213,6 +221,8 @@ export const solutions: Solution[] = [
     sourceIds: ['medication'], suggestionIds: ['med-review']
   }
 ]
+
+export const solutions: Solution[] = [...coreSolutions, ...expandedSolutions]
 
 export const findSolutionForSuggestion = (suggestionId: string) =>
   solutions.find(s => s.suggestionIds?.includes(suggestionId))
