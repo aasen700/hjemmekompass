@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, ClipboardList, Compass, Heart, Home, Info, Lightbulb, Menu, RotateCcw, ShieldCheck, X } from 'lucide-react'
-import { attitudes, deepQuestions, fourChoices, priorities, screeningQuestions, topicCards, visitImportance, type Answers, type AssessmentMode, type Question } from './data/assessment'
+import { attitudes, deepQuestions, priorities, screeningQuestions, topicCards, visitImportance, type Answers, type AssessmentMode, type Question } from './data/assessment'
 import { makeAssessment } from './engine/recommendations'
 
 type Page = 'home' | 'intent' | 'screen' | 'deep' | 'results' | 'library'
